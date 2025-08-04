@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Dashboard from "./Dashboard";
+import CommitHistory from "./CommitHistory";
 import "./App.css";
 
 // Interfaces principais
@@ -76,7 +77,12 @@ const App = () => {
         );
 
       case "commits":
-        return (
+        return selectedRepository ? (
+          <CommitHistory 
+            repository={selectedRepository}
+            onNavigate={handleNavigate}
+          />
+        ) : (
           <div style={{ 
             height: "100vh", 
             display: "flex", 
@@ -87,8 +93,8 @@ const App = () => {
             flexDirection: "column",
             gap: "20px"
           }}>
-            <h2>🚧 TELA 2 - Histórico Gráfico</h2>
-            <p>Em desenvolvimento...</p>
+            <h2>⚠️ Nenhum repositório selecionado</h2>
+            <p>Selecione um repositório no dashboard para visualizar o histórico</p>
             <button 
               onClick={() => handleNavigate("dashboard")}
               style={{
@@ -102,13 +108,6 @@ const App = () => {
             >
               ← Voltar ao Dashboard
             </button>
-            {selectedRepository && (
-              <div style={{ textAlign: "center", marginTop: "20px" }}>
-                <p><strong>Repositório:</strong> {selectedRepository.name}</p>
-                <p><strong>Branch:</strong> {selectedRepository.current_branch}</p>
-                <p><strong>Path:</strong> {selectedRepository.path}</p>
-              </div>
-            )}
           </div>
         );
 
