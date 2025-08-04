@@ -172,10 +172,7 @@ fn greet(name: &str) -> String {
 
 #[tauri::command]
 fn discover_repositories() -> Result<Vec<RepositoryInfo>, String> {
-    println!("🔍 Starting repository discovery...");
-    
     let home = env::var("HOME").unwrap_or_else(|_| "/".to_string());
-    println!("🏠 Home directory: {}", home);
     let mut repositories = Vec::new();
     
     // Buscar em diretórios comuns
@@ -194,13 +191,9 @@ fn discover_repositories() -> Result<Vec<RepositoryInfo>, String> {
     ];
 
     for search_path in search_paths {
-        println!("📁 Checking path: {}", search_path.display());
         if search_path.exists() && search_path.is_dir() {
-            println!("✅ Path exists, searching...");
             // Busca recursiva limitada a 3 níveis
             search_repositories_recursive(&search_path, &mut repositories, 0, 3);
-        } else {
-            println!("❌ Path doesn't exist or is not a directory");
         }
     }
     
@@ -210,11 +203,6 @@ fn discover_repositories() -> Result<Vec<RepositoryInfo>, String> {
     
     // Ordenar por nome para melhor visualização
     repositories.sort_by(|a, b| a.name.cmp(&b.name));
-    
-    println!("🎉 Found {} repositories", repositories.len());
-    for repo in &repositories {
-        println!("  📂 {} ({})", repo.name, repo.path);
-    }
     
     Ok(repositories)
 }
