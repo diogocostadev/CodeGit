@@ -353,6 +353,33 @@ const CommitHistory: React.FC<CommitHistoryProps> = ({ repository, onNavigate })
                   <div className="files-count">{fileChanges.length}</div>
                 </div>
                 
+                <button 
+                  onClick={() => onNavigate("diff")}
+                  style={{
+                    width: '100%',
+                    padding: '10px 16px',
+                    background: 'rgba(59, 130, 246, 0.1)',
+                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                    borderRadius: '8px',
+                    color: '#60a5fa',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    transition: 'all 120ms ease',
+                    marginBottom: '16px'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(59, 130, 246, 0.2)';
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  📄 Ver Diff Completo
+                </button>
+                
                 {fileChanges.map((file, index) => (
                   <div key={index} className="file-item">
                     <div className={`file-status ${file.status}`}>
