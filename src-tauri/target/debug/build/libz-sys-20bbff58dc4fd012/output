@@ -70,7 +70,7 @@ cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
 CRATE_CC_NO_DEFAULTS = None
 DEBUG = Some(true)
 cargo:rerun-if-env-changed=MACOSX_DEPLOYMENT_TARGET
-MACOSX_DEPLOYMENT_TARGET = None
+MACOSX_DEPLOYMENT_TARGET = Some(10.13)
 cargo:rerun-if-env-changed=CFLAGS
 CFLAGS = None
 cargo:rerun-if-env-changed=HOST_CFLAGS
@@ -80,5 +80,5 @@ CFLAGS_aarch64_apple_darwin = None
 cargo:rerun-if-env-changed=CFLAGS_aarch64-apple-darwin
 CFLAGS_aarch64-apple-darwin = None
 CARGO_ENCODED_RUSTFLAGS = Some()
-running LC_ALL="C" "cc" "-O0" "-ffunction-sections" "-fdata-sections" "-fPIC" "-gdwarf-2" "-fno-omit-frame-pointer" "--target=arm64-apple-macosx" "-mmacosx-version-min=15.5" "-Wall" "-Wextra" "src/smoke.c" "-g0" "-o" "/dev/null" "-lz"
+running LC_ALL="C" "cc" "-O0" "-ffunction-sections" "-fdata-sections" "-fPIC" "-gdwarf-2" "-fno-omit-frame-pointer" "--target=arm64-apple-macosx" "-mmacosx-version-min=10.13" "-Wall" "-Wextra" "src/smoke.c" "-g0" "-o" "/dev/null" "-lz"
 cargo:rustc-link-lib=z

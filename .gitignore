@@ -112,6 +112,7 @@ dist
 
 # Tauri specific
 src-tauri/target/
+src-tauri/Cargo.lock
 
 # IDE
 .vscode/
@@ -135,3 +136,7 @@ Thumbs.db
 
 # Local development
 *.local
+
+# Package locks (keep only one)
+package-lock.json
+yarn.lock

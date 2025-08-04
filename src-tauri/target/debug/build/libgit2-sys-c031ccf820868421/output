@@ -161,7 +161,7 @@ cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
 CRATE_CC_NO_DEFAULTS = None
 DEBUG = Some(true)
 cargo:rerun-if-env-changed=MACOSX_DEPLOYMENT_TARGET
-MACOSX_DEPLOYMENT_TARGET = None
+MACOSX_DEPLOYMENT_TARGET = Some(10.13)
 cargo:rerun-if-env-changed=CFLAGS
 CFLAGS = None
 cargo:rerun-if-env-changed=HOST_CFLAGS
@@ -323,129 +323,6 @@ exit status: 0
 exit status: 0
 exit status: 0
 exit status: 0
-cargo:warning=libgit2/src/libgit2/streams/stransport.c:64:8: warning: 'SSLHandshake' is deprecated: first deprecated in macOS 10.15 - No longer supported. Use Network.framework. [-Wdeprecated-declarations]
-cargo:warning=   64 |         ret = SSLHandshake(st->ctx);
-cargo:warning=      |               ^
-cargo:warning=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Security.framework/Headers/SecureTransport.h:1641:1: note: 'SSLHandshake' has been explicitly marked deprecated here
-cargo:warning= 1641 | SSLHandshake                            (SSLContextRef          context)
-cargo:warning=      | ^
-cargo:warning=libgit2/src/libgit2/streams/stransport.c:73:13: warning: 'SSLCopyPeerTrust' is deprecated: first deprecated in macOS 10.15 - No longer supported. Use Network.framework. [-Wdeprecated-declarations]
-cargo:warning=   73 |         if ((ret = SSLCopyPeerTrust(st->ctx, &trust)) != noErr)
-cargo:warning=      |                    ^
-cargo:warning=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Security.framework/Headers/SecureTransport.h:1261:1: note: 'SSLCopyPeerTrust' has been explicitly marked deprecated here
-cargo:warning= 1261 | SSLCopyPeerTrust                        (SSLContextRef          context,
-cargo:warning=      | ^
-cargo:warning=libgit2/src/libgit2/streams/stransport.c:79:13: warning: 'SecTrustEvaluate' is deprecated: first deprecated in macOS 10.15 [-Wdeprecated-declarations]
-cargo:warning=   79 |         if ((ret = SecTrustEvaluate(trust, &sec_res)) != noErr)
-cargo:warning=      |                    ^~~~~~~~~~~~~~~~
-cargo:warning=      |                    SecTrustEvaluateWithError
-cargo:warning=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Security.framework/Headers/SecTrust.h:377:10: note: 'SecTrustEvaluate' has been explicitly marked deprecated here
-cargo:warning=  377 | OSStatus SecTrustEvaluate(SecTrustRef trust, SecTrustResultType *result)
-cargo:warning=      |          ^
-cargo:warning=libgit2/src/libgit2/streams/stransport.c:111:13: warning: 'SSLCopyPeerTrust' is deprecated: first deprecated in macOS 10.15 - No longer supported. Use Network.framework. [-Wdeprecated-declarations]
-cargo:warning=  111 |         if ((ret = SSLCopyPeerTrust(st->ctx, &trust)) != noErr)
-cargo:warning=      |                    ^
-cargo:warning=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Security.framework/Headers/SecureTransport.h:1261:1: note: 'SSLCopyPeerTrust' has been explicitly marked deprecated here
-cargo:warning= 1261 | SSLCopyPeerTrust                        (SSLContextRef          context,
-cargo:warning=      | ^
-cargo:warning=libgit2/src/libgit2/streams/stransport.c:114:13: warning: 'SecTrustGetCertificateAtIndex' is deprecated: first deprecated in macOS 12.0 [-Wdeprecated-declarations]
-cargo:warning=  114 |         sec_cert = SecTrustGetCertificateAtIndex(trust, 0);
-cargo:warning=      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-cargo:warning=      |                    SecTrustCopyCertificateChain
-cargo:warning=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Security.framework/Headers/SecTrust.h:536:19: note: 'SecTrustGetCertificateAtIndex' has been explicitly marked deprecated here
-cargo:warning=  536 | SecCertificateRef SecTrustGetCertificateAtIndex(SecTrustRef trust, CFIndex ix)
-cargo:warning=      |                   ^
-cargo:warning=libgit2/src/libgit2/streams/stransport.c:181:13: warning: 'SSLWrite' is deprecated: first deprecated in macOS 10.15 - No longer supported. Use Network.framework. [-Wdeprecated-declarations]
-cargo:warning=  181 |         if ((ret = SSLWrite(st->ctx, data, data_len, &processed)) != noErr) {
-cargo:warning=      |                    ^
-cargo:warning=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Security.framework/Headers/SecureTransport.h:1670:1: note: 'SSLWrite' has been explicitly marked deprecated here
-cargo:warning= 1670 | SSLWrite                                        (SSLContextRef          context,
-cargo:warning=      | ^
-cargo:warning=libgit2/src/libgit2/streams/stransport.c:238:13: warning: 'SSLRead' is deprecated: first deprecated in macOS 10.15 - No longer supported. Use Network.framework. [-Wdeprecated-declarations]
-cargo:warning=  238 |         if ((ret = SSLRead(st->ctx, data, len, &processed)) != noErr) {
-cargo:warning=      |                    ^
-cargo:warning=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Security.framework/Headers/SecureTransport.h:1689:1: note: 'SSLRead' has been explicitly marked deprecated here
-cargo:warning= 1689 | SSLRead                                         (SSLContextRef          context,
-cargo:warning=      | ^
-cargo:warning=libgit2/src/libgit2/streams/stransport.c:253:8: warning: 'SSLClose' is deprecated: first deprecated in macOS 10.15 - No longer supported. Use Network.framework. [-Wdeprecated-declarations]
-cargo:warning=  253 |         ret = SSLClose(st->ctx);
-cargo:warning=      |               ^
-cargo:warning=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Security.framework/Headers/SecureTransport.h:1731:1: note: 'SSLClose' has been explicitly marked deprecated here
-cargo:warning= 1731 | SSLClose                                        (SSLContextRef          context)
-cargo:warning=      | ^
-cargo:warning=libgit2/src/libgit2/streams/stransport.c:292:12: warning: 'SSLCreateContext' is deprecated: first deprecated in macOS 10.15 - No longer supported. Use Network.framework. [-Wdeprecated-declarations]
-cargo:warning=  292 |         st->ctx = SSLCreateContext(NULL, kSSLClientSide, kSSLStreamType);
-cargo:warning=      |                   ^
-cargo:warning=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Security.framework/Headers/SecureTransport.h:316:1: note: 'SSLCreateContext' has been explicitly marked deprecated here
-cargo:warning=  316 | SSLCreateContext(CFAllocatorRef __nullable alloc, SSLProtocolSide protocolSide, SSLConnectionType connectionType)
-cargo:warning=      | ^
-cargo:warning=libgit2/src/libgit2/streams/stransport.c:292:35: warning: 'kSSLClientSide' is deprecated: first deprecated in macOS 10.15 [-Wdeprecated-declarations]
-cargo:warning=  292 |         st->ctx = SSLCreateContext(NULL, kSSLClientSide, kSSLStreamType);
-cargo:warning=      |                                          ^
-cargo:warning=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Security.framework/Headers/SecureTransport.h:218:5: note: 'kSSLClientSide' has been explicitly marked deprecated here
-cargo:warning=  218 |     kSSLClientSide CF_ENUM_DEPRECATED(10_2, 10_15, 2_0, 13_0)
-cargo:warning=      |     ^
-cargo:warning=libgit2/src/libgit2/streams/stransport.c:292:51: warning: 'kSSLStreamType' is deprecated: first deprecated in macOS 10.15 [-Wdeprecated-declarations]
-cargo:warning=  292 |         st->ctx = SSLCreateContext(NULL, kSSLClientSide, kSSLStreamType);
-cargo:warning=      |                                                          ^
-cargo:warning=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Security.framework/Headers/SecureTransport.h:223:5: note: 'kSSLStreamType' has been explicitly marked deprecated here
-cargo:warning=  223 |     kSSLStreamType CF_ENUM_DEPRECATED(10_2, 10_15, 2_0, 13_0),
-cargo:warning=      |     ^
-cargo:warning=libgit2/src/libgit2/streams/stransport.c:299:13: warning: 'SSLSetIOFuncs' is deprecated: first deprecated in macOS 10.15 - No longer supported. Use Network.framework. [-Wdeprecated-declarations]
-cargo:warning=  299 |         if ((ret = SSLSetIOFuncs(st->ctx, read_cb, write_cb)) != noErr ||
-cargo:warning=      |                    ^
-cargo:warning=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Security.framework/Headers/SecureTransport.h:418:1: note: 'SSLSetIOFuncs' has been explicitly marked deprecated here
-cargo:warning=  418 | SSLSetIOFuncs                           (SSLContextRef          context,
-cargo:warning=      | ^
-cargo:warning=libgit2/src/libgit2/streams/stransport.c:300:13: warning: 'SSLSetConnection' is deprecated: first deprecated in macOS 10.15 - No longer supported. Use Network.framework. [-Wdeprecated-declarations]
-cargo:warning=  300 |             (ret = SSLSetConnection(st->ctx, st)) != noErr ||
-cargo:warning=      |                    ^
-cargo:warning=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Security.framework/Headers/SecureTransport.h:657:1: note: 'SSLSetConnection' has been explicitly marked deprecated here
-cargo:warning=  657 | SSLSetConnection                        (SSLContextRef                  context,
-cargo:warning=      | ^
-cargo:warning=libgit2/src/libgit2/streams/stransport.c:301:13: warning: 'SSLSetSessionOption' is deprecated: first deprecated in macOS 10.15 - No longer supported. Use Network.framework. [-Wdeprecated-declarations]
-cargo:warning=  301 |             (ret = SSLSetSessionOption(st->ctx, kSSLSessionOptionBreakOnServerAuth, true)) != noErr ||
-cargo:warning=      |                    ^
-cargo:warning=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Security.framework/Headers/SecureTransport.h:384:1: note: 'SSLSetSessionOption' has been explicitly marked deprecated here
-cargo:warning=  384 | SSLSetSessionOption                     (SSLContextRef          context,
-cargo:warning=      | ^
-cargo:warning=libgit2/src/libgit2/streams/stransport.c:301:42: warning: 'kSSLSessionOptionBreakOnServerAuth' is deprecated: first deprecated in macOS 10.15 [-Wdeprecated-declarations]
-cargo:warning=  301 |             (ret = SSLSetSessionOption(st->ctx, kSSLSessionOptionBreakOnServerAuth, true)) != noErr ||
-cargo:warning=      |                                                 ^
-cargo:warning=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Security.framework/Headers/SecureTransport.h:99:2: note: 'kSSLSessionOptionBreakOnServerAuth' has been explicitly marked deprecated here
-cargo:warning=   99 |         kSSLSessionOptionBreakOnServerAuth CF_ENUM_DEPRECATED(10_2, 10_15, 2_0, 13_0) = 0,
-cargo:warning=      |         ^
-cargo:warning=libgit2/src/libgit2/streams/stransport.c:302:13: warning: 'SSLSetProtocolVersionMin' is deprecated: first deprecated in macOS 10.15 - No longer supported. Use Network.framework. [-Wdeprecated-declarations]
-cargo:warning=  302 |             (ret = SSLSetProtocolVersionMin(st->ctx, kTLSProtocol1)) != noErr ||
-cargo:warning=      |                    ^
-cargo:warning=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Security.framework/Headers/SecureTransport.h:458:1: note: 'SSLSetProtocolVersionMin' has been explicitly marked deprecated here
-cargo:warning=  458 | SSLSetProtocolVersionMin  (SSLContextRef      context,
-cargo:warning=      | ^
-cargo:warning=libgit2/src/libgit2/streams/stransport.c:302:47: warning: 'kTLSProtocol1' is deprecated: first deprecated in macOS 10.15 [-Wdeprecated-declarations]
-cargo:warning=  302 |             (ret = SSLSetProtocolVersionMin(st->ctx, kTLSProtocol1)) != noErr ||
-cargo:warning=      |                                                      ^
-cargo:warning=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Security.framework/Headers/SecProtocolTypes.h:157:5: note: 'kTLSProtocol1' has been explicitly marked deprecated here
-cargo:warning=  157 |     kTLSProtocol1 CF_ENUM_DEPRECATED(10_2, 10_15, 5_0, 13_0) = 4,
-cargo:warning=      |     ^
-cargo:warning=libgit2/src/libgit2/streams/stransport.c:303:13: warning: 'SSLSetProtocolVersionMax' is deprecated: first deprecated in macOS 10.15 - No longer supported. Use Network.framework. [-Wdeprecated-declarations]
-cargo:warning=  303 |             (ret = SSLSetProtocolVersionMax(st->ctx, kTLSProtocol12)) != noErr ||
-cargo:warning=      |                    ^
-cargo:warning=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Security.framework/Headers/SecureTransport.h:494:1: note: 'SSLSetProtocolVersionMax' has been explicitly marked deprecated here
-cargo:warning=  494 | SSLSetProtocolVersionMax  (SSLContextRef      context,
-cargo:warning=      | ^
-cargo:warning=libgit2/src/libgit2/streams/stransport.c:303:47: warning: 'kTLSProtocol12' is deprecated: first deprecated in macOS 10.15 [-Wdeprecated-declarations]
-cargo:warning=  303 |             (ret = SSLSetProtocolVersionMax(st->ctx, kTLSProtocol12)) != noErr ||
-cargo:warning=      |                                                      ^
-cargo:warning=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Security.framework/Headers/SecProtocolTypes.h:159:5: note: 'kTLSProtocol12' has been explicitly marked deprecated here
-cargo:warning=  159 |     kTLSProtocol12 CF_ENUM_DEPRECATED(10_2, 10_15, 5_0, 13_0) = 8,
-cargo:warning=      |     ^
-cargo:warning=libgit2/src/libgit2/streams/stransport.c:304:13: warning: 'SSLSetPeerDomainName' is deprecated: first deprecated in macOS 10.15 - No longer supported. Use Network.framework. [-Wdeprecated-declarations]
-cargo:warning=  304 |             (ret = SSLSetPeerDomainName(st->ctx, host, strlen(host))) != noErr) {
-cargo:warning=      |                    ^
-cargo:warning=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Security.framework/Headers/SecureTransport.h:686:1: note: 'SSLSetPeerDomainName' has been explicitly marked deprecated here
-cargo:warning=  686 | SSLSetPeerDomainName            (SSLContextRef          context,
-cargo:warning=      | ^
-cargo:warning=20 warnings generated.
 exit status: 0
 exit status: 0
 exit status: 0

@@ -177,10 +177,10 @@ fn discover_repositories() -> Result<Vec<RepositoryInfo>, String> {
     
     // Buscar em diretórios comuns
     let search_paths = vec![
-        PathBuf::from(&home),
         PathBuf::from(format!("{}/Documents", home)),
         PathBuf::from(format!("{}/Desktop", home)),
         PathBuf::from(format!("{}/Projects", home)),
+        PathBuf::from(format!("{}/Projetos", home)),
         PathBuf::from(format!("{}/Developer", home)),
         PathBuf::from(format!("{}/Code", home)),
         PathBuf::from(format!("{}/Development", home)),
@@ -192,8 +192,8 @@ fn discover_repositories() -> Result<Vec<RepositoryInfo>, String> {
 
     for search_path in search_paths {
         if search_path.exists() && search_path.is_dir() {
-            // Busca recursiva limitada a 3 níveis
-            search_repositories_recursive(&search_path, &mut repositories, 0, 3);
+            // Busca recursiva limitada a 2 níveis para melhor performance
+            search_repositories_recursive(&search_path, &mut repositories, 0, 2);
         }
     }
     
