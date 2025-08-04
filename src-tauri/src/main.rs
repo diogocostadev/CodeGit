@@ -175,27 +175,35 @@ fn discover_repositories() -> Result<Vec<RepositoryInfo>, String> {
     let home = env::var("HOME").unwrap_or_else(|_| "/".to_string());
     let mut repositories = Vec::new();
     
-    // Buscar em diretórios comuns
+    println!("🔍 Starting repository discovery...");
+    
+    // Buscar apenas em diretórios muito específicos para evitar travamentos
     let search_paths = vec![
-        PathBuf::from(format!("{}/Documents", home)),
-        PathBuf::from(format!("{}/Desktop", home)),
-        PathBuf::from(format!("{}/Projects", home)),
         PathBuf::from(format!("{}/Projetos", home)),
+        PathBuf::from(format!("{}/Projects", home)),
         PathBuf::from(format!("{}/Developer", home)),
         PathBuf::from(format!("{}/Code", home)),
-        PathBuf::from(format!("{}/Development", home)),
-        PathBuf::from(format!("{}/workspace", home)),
-        PathBuf::from(format!("{}/git", home)),
         // Adicionar o próprio diretório do CodeGit para teste
         PathBuf::from("/Users/diogo/Projetos/NovosProjetos/GitHub/codegit"),
     ];
 
-    for search_path in search_paths {
+    for search_path in &search_paths {
         if search_path.exists() && search_path.is_dir() {
-            // Busca recursiva limitada a 2 níveis para melhor performance
-            search_repositories_recursive(&search_path, &mut repositories, 0, 2);
+            println!("🔍 Searching in: {}", search_path.display());
+            // Busca recursiva limitada a 1 nível apenas para evitar travamentos
+            search_repositories_recursive(search_path, &mut repositories, 0, 1);
+            
+            // Parar se já encontramos repositórios suficientes
+            if repositories.len() >= 20 {
+                println!("⚠️  Found 20+ repositories, stopping search");
+                break;
+            }
+        } else {
+            println!("⚠️  Path does not exist or is not a directory: {}", search_path.display());
         }
     }
+    
+    println!("📊 Found {} repositories before deduplication", repositories.len());
     
     // Remover duplicatas baseado no path
     repositories.sort_by(|a, b| a.path.cmp(&b.path));
@@ -203,6 +211,8 @@ fn discover_repositories() -> Result<Vec<RepositoryInfo>, String> {
     
     // Ordenar por nome para melhor visualização
     repositories.sort_by(|a, b| a.name.cmp(&b.name));
+    
+    println!("✅ Repository discovery completed: {} unique repositories", repositories.len());
     
     Ok(repositories)
 }
@@ -217,6 +227,12 @@ fn search_repositories_recursive(
         return;
     }
     
+    // Limite de repositórios para evitar sobrecarga
+    if repositories.len() >= 20 {
+        println!("    ⚠️  Reached repository limit (20), stopping search");
+        return;
+    }
+    
     // Verificar se o diretório atual é um repositório Git
     if let Some(repo_info) = check_git_repository(dir) {
         println!("    🎯 Found Git repo: {}", repo_info.name);
@@ -224,21 +240,38 @@ fn search_repositories_recursive(
         return; // Não continuar buscando dentro de um repo Git
     }
     
-    // Buscar em subdiretórios
-    if let Ok(entries) = fs::read_dir(dir) {
-        for entry in entries.flatten() {
-            if let Ok(file_type) = entry.file_type() {
-                if file_type.is_dir() {
-                    let path = entry.path();
-                    // Pular diretórios ocultos e node_modules
-                    if let Some(name) = path.file_name() {
-                        let name_str = name.to_string_lossy();
-                        if !name_str.starts_with('.') && name_str != "node_modules" {
-                            search_repositories_recursive(&path, repositories, current_depth + 1, max_depth);
+    // Buscar em subdiretórios com tratamento de erro melhorado
+    match fs::read_dir(dir) {
+        Ok(entries) => {
+            let mut processed = 0;
+            for entry in entries.flatten() {
+                // Limite de subdiretórios processados por nível
+                if processed >= 20 {
+                    println!("    ⚠️  Too many subdirectories in {}, skipping remaining", dir.display());
+                    break;
+                }
+                
+                if let Ok(file_type) = entry.file_type() {
+                    if file_type.is_dir() {
+                        let path = entry.path();
+                        // Pular diretórios ocultos, node_modules e outros problemáticos
+                        if let Some(name) = path.file_name() {
+                            let name_str = name.to_string_lossy();
+                            if !name_str.starts_with('.') 
+                                && name_str != "node_modules" 
+                                && name_str != "target" 
+                                && name_str != "dist" 
+                                && name_str != "build" {
+                                search_repositories_recursive(&path, repositories, current_depth + 1, max_depth);
+                                processed += 1;
+                            }
                         }
                     }
                 }
             }
+        }
+        Err(e) => {
+            println!("    ⚠️  Failed to read directory {}: {}", dir.display(), e);
         }
     }
 }
@@ -250,49 +283,66 @@ fn check_git_repository(path: &PathBuf) -> Option<RepositoryInfo> {
         return None;
     }
     
-    if let Ok(repo) = Repository::open(path) {
-        let name = path.file_name()?.to_string_lossy().to_string();
-        let path_str = path.to_string_lossy().to_string();
+    // Tentar abrir o repositório com timeout implícito
+    let repo = match Repository::open(path) {
+        Ok(repo) => repo,
+        Err(_) => {
+            // Se falhar ao abrir, pular este repositório
+            println!("    ⚠️  Skipping repository (failed to open): {}", path.display());
+            return None;
+        }
+    };
+    
+    let name = path.file_name()?.to_string_lossy().to_string();
+    let path_str = path.to_string_lossy().to_string();
+    
+    // Obter branch atual com fallback seguro
+    let current_branch = repo.head()
+        .ok()
+        .and_then(|head| head.shorthand().map(|s| s.to_string()))
+        .unwrap_or_else(|| "detached".to_string());
         
-        let current_branch = repo.head()
-            .ok()
-            .and_then(|head| head.shorthand().map(|s| s.to_string()))
-            .unwrap_or_else(|| "main".to_string());
-            
-        let last_commit = repo.head()
-            .ok()
-            .and_then(|head| head.peel_to_commit().ok())
-            .map(|commit| commit.id().to_string()[..8].to_string())
-            .unwrap_or_else(|| "no-commits".to_string());
-        
-        let is_dirty = repo.statuses(None)
-            .map(|statuses| !statuses.is_empty())
-            .unwrap_or(false);
-        
-        // Usar tempo de modificação do diretório .git como aproximação do último acesso
-        let last_accessed = git_dir
-            .metadata()
-            .and_then(|meta| meta.modified())
-            .map(|time| time.duration_since(std::time::UNIX_EPOCH).unwrap_or_default())
-            .map(|duration| duration.as_secs() as i64)
-            .unwrap_or_else(|_| {
-                std::time::SystemTime::now()
-                    .duration_since(std::time::UNIX_EPOCH)
-                    .unwrap_or_default()
-                    .as_secs() as i64
-            });
-            
-        Some(RepositoryInfo {
-            name,
-            path: path_str,
-            current_branch,
-            last_commit,
-            is_dirty,
-            last_accessed,
+    // Obter último commit com fallback seguro
+    let last_commit = repo.head()
+        .ok()
+        .and_then(|head| head.peel_to_commit().ok())
+        .and_then(|commit| {
+            let id_str = commit.id().to_string();
+            if id_str.len() >= 8 {
+                Some(id_str[..8].to_string())
+            } else {
+                Some(id_str)
+            }
         })
-    } else {
-        None
-    }
+        .unwrap_or_else(|| "no-commits".to_string());
+    
+    // Verificar status com timeout
+    let is_dirty = match repo.statuses(None) {
+        Ok(statuses) => !statuses.is_empty(),
+        Err(_) => false, // Em caso de erro, assumir clean
+    };
+    
+    // Obter timestamp com fallback
+    let last_accessed = git_dir
+        .metadata()
+        .and_then(|meta| meta.modified())
+        .map(|time| time.duration_since(std::time::UNIX_EPOCH).unwrap_or_default())
+        .map(|duration| duration.as_secs() as i64)
+        .unwrap_or_else(|_| {
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap_or_default()
+                .as_secs() as i64
+        });
+        
+    Some(RepositoryInfo {
+        name,
+        path: path_str,
+        current_branch,
+        last_commit,
+        is_dirty,
+        last_accessed,
+    })
 }
 
 #[tauri::command]
