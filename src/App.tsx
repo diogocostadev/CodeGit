@@ -2,6 +2,7 @@ import { useState } from "react";
 import Dashboard from "./Dashboard";
 import CommitHistory from "./CommitHistory";
 import DiffViewer from "./DiffViewer";
+import MergeInteractive from "./MergeInteractive";
 import "./App.css";
 
 // Interfaces principais
@@ -148,7 +149,12 @@ const App = () => {
         );
 
       case "merge":
-        return (
+        return selectedRepository ? (
+          <MergeInteractive 
+            repository={selectedRepository}
+            onNavigate={handleNavigate}
+          />
+        ) : (
           <div style={{ 
             height: "100vh", 
             display: "flex", 
@@ -159,8 +165,8 @@ const App = () => {
             flexDirection: "column",
             gap: "20px"
           }}>
-            <h2>🚧 TELA 4 - Merge Interativo (Drag-and-Drop)</h2>
-            <p>Em desenvolvimento...</p>
+            <h2>⚠️ Nenhum repositório selecionado</h2>
+            <p>Selecione um repositório no dashboard para fazer merge interativo</p>
             <button 
               onClick={() => handleNavigate("dashboard")}
               style={{

@@ -298,6 +298,16 @@ const Dashboard: React.FC<DashboardProps> = ({ onRepositorySelect, onNavigate })
                     >
                       📊 Histórico
                     </button>
+                    <button
+                      className="card-action-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onNavigate("merge");
+                        handleRepositoryClick(repo);
+                      }}
+                    >
+                      🔀 Merge
+                    </button>
                   </div>
                 </div>
               </div>
