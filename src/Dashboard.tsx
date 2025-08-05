@@ -208,6 +208,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onRepositorySelect, onNavigate })
             {searchQuery ? `Resultados para "${searchQuery}"` : "Repositórios Recentes"}
           </div>
           <div className="header-actions">
+            <button className="action-btn" onClick={() => onNavigate('creator')}>
+              ➕ Novo Repositório
+            </button>
             <button className="action-btn" onClick={cloneRepository}>
               📋 Clonar
             </button>
@@ -238,8 +241,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onRepositorySelect, onNavigate })
                 }
               </div>
               {!searchQuery && (
-                <div style={{display: "flex", gap: "12px"}}>
-                  <button className="action-btn primary" onClick={openRepository}>
+                <div style={{display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center"}}>
+                  <button className="action-btn primary" onClick={() => onNavigate('creator')}>
+                    ➕ Novo Repositório
+                  </button>
+                  <button className="action-btn" onClick={openRepository}>
                     📂 Abrir Local
                   </button>
                   <button className="action-btn" onClick={cloneRepository}>

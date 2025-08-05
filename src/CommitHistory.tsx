@@ -84,7 +84,7 @@ const CommitHistory: React.FC<CommitHistoryProps> = ({ repository, onNavigate })
     }
   };
 
-  const loadFileChanges = async (commit: GitCommit) => {
+  const loadFileChanges = async (_commit: GitCommit) => {
     try {
       // Simular carregamento de mudanças de arquivo
       // Na implementação real, seria uma chamada para o backend

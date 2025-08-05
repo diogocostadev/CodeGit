@@ -1,0 +1,62 @@
+/* ===== DESABILITAR MENU DE CONTEXTO DO BROWSER ===== */
+
+/* Desabilitar menu de contexto em toda a aplicação */
+* {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Permitir seleção apenas em inputs e áreas de texto */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="url"],
+textarea,
+[contenteditable="true"] {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Permitir seleção de código para copy/paste */
+pre,
+code,
+.code-block,
+.commit-hash,
+.branch-name,
+.file-path {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Desabilitar arrastar imagens */
+img {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+}
+
+/* Desabilitar highlight de texto em mobile */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Estilo customizado para foco sem outline padrão */
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+}
+
+/* Custom focus styles já estão definidos nos outros CSS files */

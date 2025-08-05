@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { invoke } from "@tauri-apps/api/tauri";
 import "./DiffViewer.css";
 
 interface RepositoryInfo {

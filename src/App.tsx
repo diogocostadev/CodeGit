@@ -3,6 +3,11 @@ import Dashboard from "./Dashboard";
 import CommitHistory from "./CommitHistory";
 import DiffViewer from "./DiffViewer";
 import MergeInteractive from "./MergeInteractive";
+import ConflictResolver from "./ConflictResolver";
+import BranchManager from "./BranchManager";
+import Settings from "./Settings";
+import Account from "./Account";
+import RepositoryCreator from "./RepositoryCreator";
 import "./App.css";
 
 // Interfaces principais
@@ -15,20 +20,20 @@ interface RepositoryInfo {
   last_accessed: number;
 }
 
-interface GitCommit {
-  id: string;
-  message: string;
-  author: string;
-  email: string;
-  timestamp: number;
-}
+// interface GitCommit {
+//   id: string;
+//   message: string;
+//   author: string;
+//   email: string;
+//   timestamp: number;
+// }
 
-interface GitBranch {
-  name: string;
-  is_head: boolean;
-  is_remote: boolean;
-  target?: string;
-}
+// interface GitBranch {
+//   name: string;
+//   is_head: boolean;
+//   is_remote: boolean;
+//   target?: string;
+// }
 
 // Tipos de telas disponíveis
 type Screen = 
@@ -39,18 +44,23 @@ type Screen =
   | "conflicts"
   | "branches"
   | "settings"
-  | "account";
+  | "account"
+  | "creator";
 
 const App = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>("dashboard");
   const [selectedRepository, setSelectedRepository] = useState<RepositoryInfo | null>(null);
-  const [commits, setCommits] = useState<GitCommit[]>([]);
-  const [branches, setBranches] = useState<GitBranch[]>([]);
+  // const [commits, setCommits] = useState<GitCommit[]>([]);
+  // const [branches, setBranches] = useState<GitBranch[]>([]);
 
   const handleRepositorySelect = (repo: RepositoryInfo) => {
     setSelectedRepository(repo);
     // Carregar dados do repositório selecionado
     loadRepositoryData(repo);
+  };
+
+  const handleRepositoryCreated = (repo: RepositoryInfo) => {
+    setSelectedRepository(repo);
   };
 
   const loadRepositoryData = async (repo: RepositoryInfo) => {
@@ -63,8 +73,8 @@ const App = () => {
     }
   };
 
-  const handleNavigate = (screen: Screen) => {
-    setCurrentScreen(screen);
+  const handleNavigate = (screen: string) => {
+    setCurrentScreen(screen as Screen);
   };
 
   // Renderizar a tela atual
@@ -184,7 +194,12 @@ const App = () => {
         );
 
       case "conflicts":
-        return (
+        return selectedRepository ? (
+          <ConflictResolver 
+            repository={selectedRepository}
+            onNavigate={handleNavigate}
+          />
+        ) : (
           <div style={{ 
             height: "100vh", 
             display: "flex", 
@@ -195,8 +210,8 @@ const App = () => {
             flexDirection: "column",
             gap: "20px"
           }}>
-            <h2>🚧 TELA 5 - Resolução Visual de Conflitos</h2>
-            <p>Em desenvolvimento...</p>
+            <h2>⚠️ Nenhum repositório selecionado</h2>
+            <p>Selecione um repositório no dashboard para resolver conflitos</p>
             <button 
               onClick={() => handleNavigate("dashboard")}
               style={{
@@ -214,7 +229,12 @@ const App = () => {
         );
 
       case "branches":
-        return (
+        return selectedRepository ? (
+          <BranchManager 
+            repository={selectedRepository}
+            onNavigate={handleNavigate}
+          />
+        ) : (
           <div style={{ 
             height: "100vh", 
             display: "flex", 
@@ -225,8 +245,8 @@ const App = () => {
             flexDirection: "column",
             gap: "20px"
           }}>
-            <h2>🚧 TELA 6 - Gerenciamento de Branches</h2>
-            <p>Em desenvolvimento...</p>
+            <h2>⚠️ Nenhum repositório selecionado</h2>
+            <p>Selecione um repositório no dashboard para gerenciar branches</p>
             <button 
               onClick={() => handleNavigate("dashboard")}
               style={{
@@ -245,62 +265,24 @@ const App = () => {
 
       case "settings":
         return (
-          <div style={{ 
-            height: "100vh", 
-            display: "flex", 
-            alignItems: "center", 
-            justifyContent: "center",
-            background: "#0a0b0d",
-            color: "#e2e8f0",
-            flexDirection: "column",
-            gap: "20px"
-          }}>
-            <h2>🚧 TELA 7 - Configurações e Personalização</h2>
-            <p>Em desenvolvimento...</p>
-            <button 
-              onClick={() => handleNavigate("dashboard")}
-              style={{
-                padding: "10px 20px",
-                background: "#3b82f6",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                cursor: "pointer"
-              }}
-            >
-              ← Voltar ao Dashboard
-            </button>
-          </div>
+          <Settings 
+            onNavigate={handleNavigate}
+          />
         );
 
       case "account":
         return (
-          <div style={{ 
-            height: "100vh", 
-            display: "flex", 
-            alignItems: "center", 
-            justifyContent: "center",
-            background: "#0a0b0d",
-            color: "#e2e8f0",
-            flexDirection: "column",
-            gap: "20px"
-          }}>
-            <h2>🚧 TELA 8 - Licenciamento e Conta</h2>
-            <p>Em desenvolvimento...</p>
-            <button 
-              onClick={() => handleNavigate("dashboard")}
-              style={{
-                padding: "10px 20px",
-                background: "#3b82f6",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                cursor: "pointer"
-              }}
-            >
-              ← Voltar ao Dashboard
-            </button>
-          </div>
+          <Account 
+            onNavigate={handleNavigate}
+          />
+        );
+
+      case "creator":
+        return (
+          <RepositoryCreator 
+            onNavigate={handleNavigate}
+            onRepositoryCreated={handleRepositoryCreated}
+          />
         );
 
       default:
