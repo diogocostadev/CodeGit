@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./enhanced-design-system.css";
 import "./button-alignment-fixes.css";
+import "./micro-interactions.css";
 import "./styles.css";
 import "./design-system.css";
 import "./responsive.css";

@@ -3,6 +3,7 @@ import { Workspace, SidebarState, Organization, RepositoryInfo, RepositorySortBy
 import BulkOperationsPanel from '../bulk/BulkOperationsPanel';
 import RepositoryDiscoveryPanel from '../repository/RepositoryDiscoveryPanel';
 import { useAppState } from '../../contexts/AppStateContext';
+import { invoke } from '@tauri-apps/api/tauri';
 import './RepositorySidebar.css';
 
 interface RepositorySidebarProps {
@@ -11,6 +12,12 @@ interface RepositorySidebarProps {
   selectedRepository?: string;
   onRepositorySelect: (repositoryId: string) => void;
   onLayoutChange: (changes: Partial<SidebarState>) => void;
+  showFilter?: boolean;
+  showOrganizations?: boolean;
+  showDiscovery?: boolean;
+  onCloseFilter?: () => void;
+  onCloseOrganizations?: () => void;
+  onCloseDiscovery?: () => void;
 }
 
 const RepositorySidebar: React.FC<RepositorySidebarProps> = ({
@@ -18,7 +25,13 @@ const RepositorySidebar: React.FC<RepositorySidebarProps> = ({
   layout,
   selectedRepository,
   onRepositorySelect,
-  onLayoutChange
+  onLayoutChange,
+  showFilter,
+  showOrganizations,
+  showDiscovery,
+  onCloseFilter,
+  onCloseOrganizations,
+  onCloseDiscovery
 }) => {
   const [contextMenu, setContextMenu] = useState<{
     x: number;
@@ -28,8 +41,6 @@ const RepositorySidebar: React.FC<RepositorySidebarProps> = ({
   } | null>(null);
 
   const [showBulkOperations, setShowBulkOperations] = useState(false);
-  const [showOrganizationManager, setShowOrganizationManager] = useState(false);
-  const [showRepositoryDiscovery, setShowRepositoryDiscovery] = useState(false);
 
   // Filter and sort repositories
   const filteredRepositories = useMemo(() => {
@@ -175,73 +186,20 @@ const RepositorySidebar: React.FC<RepositorySidebarProps> = ({
 
   return (
     <div className="repository-sidebar" style={{ width: layout.width }}>
-      {/* Search and controls */}
+      {/* Simplified header - centralized sorting */}
       <div className="sidebar-header">
-        <div className="search-section">
-          <div className="search-input-wrapper">
-            <svg className="search-icon" width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-              <path d="M11.742 10.344a6.5 6.5 0 10-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 001.415-1.414l-3.85-3.85a1.007 1.007 0 00-.115-.1zM12 6.5a5.5 5.5 0 11-11 0 5.5 5.5 0 0111 0z"/>
-            </svg>
-            <input
-              type="text"
-              className="search-input"
-              placeholder="Search repositories..."
-              value={layout.search_query}
-              onChange={(e) => handleSearchChange(e.target.value)}
-            />
-            {layout.search_query && (
-              <button
-                className="search-clear"
-                onClick={() => handleSearchChange('')}
-                aria-label="Clear search"
-              >
-                <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor">
-                  <path d="M6 4.586L9.707.879A1 1 0 0111.121 2.293L7.414 6l3.707 3.707a1 1 0 01-1.414 1.414L6 7.414l-3.707 3.707A1 1 0 01.879 9.707L4.586 6 .879 2.293A1 1 0 012.293.879L6 4.586z"/>
-                </svg>
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div className="controls-section">
+        <div className="sort-control">
           <select 
             className="sort-select"
             value={layout.sort_by}
             onChange={(e) => handleSortChange(e.target.value as RepositorySortBy)}
+            title="Sort repositories"
           >
             <option value="name">Name</option>
             <option value="last_accessed">Last Accessed</option>
             <option value="last_commit">Last Commit</option>
             <option value="status">Status</option>
           </select>
-          
-          <button className="filter-button" title="Filter repositories">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-              <path d="M3.5 2.75a.75.75 0 00-1.5 0v8.5a.75.75 0 001.5 0v-3.5h4a.75.75 0 000-1.5h-4v-3.5zM14 7a.75.75 0 01-.75.75h-4a.75.75 0 010-1.5h4A.75.75 0 0114 7zM14 11.25a.75.75 0 01-.75.75h-4a.75.75 0 010-1.5h4a.75.75 0 01.75.75z"/>
-            </svg>
-          </button>
-          
-          <button 
-            className="organization-button" 
-            title="Manage organizations"
-            onClick={() => setShowOrganizationManager(true)}
-          >
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-              <path d="M1.75 2h12.5c.966 0 1.75.784 1.75 1.75v8.5A1.75 1.75 0 0114.25 14H1.75A1.75 1.75 0 010 12.25v-8.5C0 2.784.784 2 1.75 2zM1.5 12.251c0 .138.112.25.25.25h12.5a.25.25 0 00.25-.25V9.5h-13v2.751zm13-8.501a.25.25 0 00-.25-.25H1.75a.25.25 0 00-.25.25V8h13V3.75z"/>
-              <path d="M9.5 5.5a.5.5 0 01.5-.5h4a.5.5 0 010 1h-4a.5.5 0 01-.5-.5zM2.5 5.5a.5.5 0 01.5-.5h4a.5.5 0 010 1H3a.5.5 0 01-.5-.5z"/>
-            </svg>
-          </button>
-
-          <button 
-            className="discovery-button" 
-            title="Discover repositories"
-            onClick={() => setShowRepositoryDiscovery(true)}
-          >
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-              <path d="M6.22 8.72a.75.75 0 001.06 0l5.22-5.22V6.25a.75.75 0 001.5 0V3.5a.75.75 0 00-.75-.75h-2.75a.75.75 0 000 1.5h2.69L7.28 9.15a.75.75 0 000 1.06z"/>
-              <path d="M3.25 3.25h3a.75.75 0 000-1.5h-3A1.75 1.75 0 001.5 3.5v9c0 .966.784 1.75 1.75 1.75h9A1.75 1.75 0 0014 12.5v-3a.75.75 0 00-1.5 0v3a.25.25 0 01-.25.25h-9a.25.25 0 01-.25-.25v-9a.25.25 0 01.25-.25z"/>
-            </svg>
-          </button>
         </div>
       </div>
 
@@ -269,7 +227,7 @@ const RepositorySidebar: React.FC<RepositorySidebarProps> = ({
               <span>Organizations</span>
               <button 
                 className="create-org-button" 
-                onClick={() => setShowOrganizationManager(true)}
+                onClick={onCloseOrganizations ? () => onCloseOrganizations() : undefined}
                 title="Create new organization"
               >
                 <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
@@ -312,7 +270,7 @@ const RepositorySidebar: React.FC<RepositorySidebarProps> = ({
             <p className="empty-hint">Get started by discovering Git repositories on your system</p>
             <button 
               className="add-repository-button"
-              onClick={() => setShowRepositoryDiscovery(true)}
+              onClick={onCloseDiscovery}
             >
               🔍 Discover Repositories
             </button>
@@ -394,25 +352,25 @@ const RepositorySidebar: React.FC<RepositorySidebarProps> = ({
       )}
 
       {/* Organization Manager Modal */}
-      {showOrganizationManager && (
+      {showOrganizations && onCloseOrganizations && (
         <div className="organization-manager-modal">
-          <div className="organization-manager-backdrop" onClick={() => setShowOrganizationManager(false)} />
+          <div className="organization-manager-backdrop" onClick={onCloseOrganizations} />
           <div className="organization-manager-container">
             <OrganizationManager
               workspace={workspace}
-              onClose={() => setShowOrganizationManager(false)}
+              onClose={onCloseOrganizations}
             />
           </div>
         </div>
       )}
 
       {/* Repository Discovery Modal */}
-      {showRepositoryDiscovery && (
+      {showDiscovery && onCloseDiscovery && (
         <div className="repository-discovery-modal">
-          <div className="repository-discovery-backdrop" onClick={() => setShowRepositoryDiscovery(false)} />
+          <div className="repository-discovery-backdrop" onClick={onCloseDiscovery} />
           <div className="repository-discovery-container">
             <RepositoryDiscoveryPanel
-              onClose={() => setShowRepositoryDiscovery(false)}
+              onClose={onCloseDiscovery}
             />
           </div>
         </div>
@@ -656,6 +614,7 @@ const OrganizationManager: React.FC<{
   const [newOrgName, setNewOrgName] = useState('');
   const [newOrgColor, setNewOrgColor] = useState('#3b82f6');
   const [editingOrg, setEditingOrg] = useState<Organization | null>(null);
+  const [deletingOrg, setDeletingOrg] = useState<Organization | null>(null);
 
   const predefinedColors = [
     '#3b82f6', '#ef4444', '#10b981', '#f59e0b', 
@@ -698,14 +657,31 @@ const OrganizationManager: React.FC<{
   };
 
   const handleDeleteOrganization = (orgId: string) => {
-    // Move all repositories from this organization to ungrouped
-    Object.values(workspace.repositories).forEach(repo => {
-      if (repo.organization_id === orgId) {
-        updateRepository({ ...repo, organization_id: undefined });
-      }
-    });
+    const org = workspace.organizations.find(o => o.id === orgId);
+    if (org) {
+      setDeletingOrg(org);
+    }
+  };
+
+  const confirmDeleteOrganization = async () => {
+    if (!deletingOrg) return;
     
-    removeOrganization(orgId);
+    try {
+      // Move all repositories from this organization to ungrouped
+      Object.values(workspace.repositories).forEach(repo => {
+        if (repo.organization_id === deletingOrg.id) {
+          updateRepository({ ...repo, organization_id: undefined });
+        }
+      });
+      
+      // Remove organization from database and state
+      await invoke('delete_organization', { id: deletingOrg.id });
+      removeOrganization(deletingOrg.id);
+      
+      setDeletingOrg(null);
+    } catch (error) {
+      console.error('Failed to delete organization:', error);
+    }
   };
 
   const handleMoveRepository = (repoId: string, targetOrgId: string | undefined) => {
@@ -765,9 +741,10 @@ const OrganizationManager: React.FC<{
         </div>
 
         {/* Existing Organizations */}
-        <div className="organizations-list">
+        <div className="organizations-section">
           <h4>Organizations ({workspace.organizations.length})</h4>
-          {workspace.organizations.map(org => {
+          <div className="organizations-list">
+            {workspace.organizations.map(org => {
             const orgRepos = Object.values(workspace.repositories).filter(
               repo => repo.organization_id === org.id
             );
@@ -808,19 +785,17 @@ const OrganizationManager: React.FC<{
                       className="edit-button"
                       onClick={() => setEditingOrg(org)}
                       title="Edit organization"
+                      aria-label="Edit organization"
                     >
-                      <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
-                        <path d="M11.013 1.427a1.75 1.75 0 012.474 0l1.086 1.086a1.75 1.75 0 010 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 01-.927-.928l.929-3.25a1.75 1.75 0 01.445-.758l8.61-8.61z"/>
-                      </svg>
+                      <span style={{ fontSize: '14px' }}>✏️</span>
                     </button>
                     <button 
                       className="delete-button"
                       onClick={() => handleDeleteOrganization(org.id)}
                       title="Delete organization"
+                      aria-label="Delete organization"
                     >
-                      <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
-                        <path d="M6.5 1.75a.25.25 0 01.25-.25h2.5a.25.25 0 01.25.25V3h-3V1.75zm4.5 0V3h2.25a.75.75 0 010 1.5H2.75a.75.75 0 010-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75zM4.496 6.675a.75.75 0 10-1.492.15l.66 6.6A1.75 1.75 0 005.405 15h5.19c.9 0 1.652-.681 1.741-1.576l.66-6.6a.75.75 0 00-1.492-.149L10.844 13.5a.25.25 0 01-.249.219H5.405a.25.25 0 01-.249-.219L4.496 6.675z"/>
-                      </svg>
+                      <span style={{ fontSize: '14px' }}>🗑️</span>
                     </button>
                   </div>
                 </div>
@@ -847,6 +822,7 @@ const OrganizationManager: React.FC<{
               </div>
             );
           })}
+          </div>
         </div>
 
         {/* Ungrouped Repositories */}
@@ -883,6 +859,68 @@ const OrganizationManager: React.FC<{
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deletingOrg && (
+        <div className="modal-overlay" onClick={() => setDeletingOrg(null)}>
+          <div className="modal-content delete-confirmation" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="modal-title">🗑️ Delete Organization</div>
+              <button 
+                className="modal-close"
+                onClick={() => setDeletingOrg(null)}
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="modal-body">
+              <div className="delete-warning">
+                <div className="warning-icon">⚠️</div>
+                <div className="warning-text">
+                  <div><strong>Are you sure you want to delete "{deletingOrg.name}"?</strong></div>
+                  <div>This action cannot be undone. All repositories in this organization will be moved to the ungrouped section.</div>
+                  
+                  {(() => {
+                    const orgRepos = Object.values(workspace.repositories).filter(
+                      repo => repo.organization_id === deletingOrg.id
+                    );
+                    return orgRepos.length > 0 ? (
+                      <div style={{ marginTop: '12px' }}>
+                        <strong>Repositories that will be moved:</strong>
+                        <ul style={{ margin: '8px 0', paddingLeft: '20px' }}>
+                          {orgRepos.map(repo => (
+                            <li key={repo.id}>{repo.name}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : (
+                      <div style={{ marginTop: '12px', color: '#10b981' }}>
+                        ✅ This organization is empty and can be safely deleted.
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+            </div>
+            
+            <div className="modal-footer">
+              <button 
+                className="modal-btn cancel"
+                onClick={() => setDeletingOrg(null)}
+              >
+                Cancel
+              </button>
+              <button 
+                className="modal-btn delete"
+                onClick={confirmDeleteOrganization}
+              >
+                Delete Organization
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

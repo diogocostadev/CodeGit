@@ -317,6 +317,22 @@
   color: var(--text-primary);
 }
 
+/* Repository action buttons - specific colors on hover */
+.header-button.filter-button:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--accent-info, #3b82f6);
+}
+
+.header-button.organizations-button:hover {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--accent-success, #10b981);
+}
+
+.header-button.discovery-button:hover {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--accent-warning, #f59e0b);
+}
+
 
 /* Notifications */
 .notifications-wrapper {

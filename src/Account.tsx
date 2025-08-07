@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { invoke } from '@tauri-apps/api/tauri';
+import { useAppState } from './contexts/AppStateContext';
 import "./Account.css";
 import "./design-system.css";
 
@@ -39,6 +41,7 @@ interface Usage {
 }
 
 const Account: React.FC<AccountProps> = ({ onNavigate }) => {
+  const { state } = useAppState();
   const [activeTab, setActiveTab] = useState<string>('profile');
   const [userProfile, setUserProfile] = useState<UserProfile>({
     name: '',
@@ -76,28 +79,52 @@ const Account: React.FC<AccountProps> = ({ onNavigate }) => {
     loadAccountData();
   }, []);
 
+  // Recarregar dados quando o usuário ou workspace mudar
+  useEffect(() => {
+    if (state.user) {
+      loadAccountData();
+    }
+  }, [state.user, state.active_workspace, state.workspaces]);
+
   const loadAccountData = async () => {
     try {
       setLoading(true);
       
-      // Simular carregamento dos dados da conta
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Carregar dados do usuário do estado da aplicação e banco de dados
+      const user = state.user;
+      if (!user) {
+        console.warn('No user data available');
+        return;
+      }
+
+      // Buscar informações adicionais do banco de dados
+      const dbInfo = await invoke('get_database_info') as any;
       
+      // Contar repositórios no workspace ativo
+      const currentWorkspace = state.workspaces[state.active_workspace];
+      const repositoriesCount = currentWorkspace ? Object.keys(currentWorkspace.repositories).length : 0;
+      
+      // Calcular data de entrada baseada no created_at do usuário
+      const joinedDate = user.created_at ? new Date(user.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+      
+      // Gerar username baseado no nome se não existir
+      const username = user.name.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '') || 'user';
+
       setUserProfile({
-        name: 'John Doe',
-        email: 'john@example.com',
-        username: 'johndoe',
-        avatar_url: 'https://github.com/johndoe.png',
-        joined_date: '2023-01-15',
-        plan: 'free',
-        repositories_count: 7,
-        commits_count: 342
+        name: user.name,
+        email: user.email,
+        username: username,
+        avatar_url: undefined, // Por enquanto sem avatar
+        joined_date: joinedDate,
+        plan: 'free', // Por padrão é free
+        repositories_count: repositoriesCount,
+        commits_count: 0 // TODO: Implementar contagem de commits se necessário
       });
       
       setLicense({
         type: 'free',
         status: 'active',
-        started_at: '2023-01-15',
+        started_at: joinedDate,
         features: [
           'Até 10 repositórios privados',
           'Interface moderna e responsiva',
@@ -113,15 +140,28 @@ const Account: React.FC<AccountProps> = ({ onNavigate }) => {
       });
       
       setUsage({
-        repositories_used: 7,
+        repositories_used: repositoriesCount,
         team_members_used: 1,
-        storage_used_gb: 2.3,
-        monthly_commits: 89,
+        storage_used_gb: 0.1, // Estimativa básica
+        monthly_commits: 0, // TODO: Implementar se necessário
         last_sync: new Date().toISOString()
       });
       
     } catch (error) {
       console.error("Failed to load account data:", error);
+      
+      // Fallback para dados básicos se falhar
+      if (state.user) {
+        setUserProfile({
+          name: state.user.name,
+          email: state.user.email,
+          username: state.user.name.toLowerCase().replace(/\s+/g, ''),
+          joined_date: new Date().toISOString().split('T')[0],
+          plan: 'free',
+          repositories_count: 0,
+          commits_count: 0
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -131,12 +171,27 @@ const Account: React.FC<AccountProps> = ({ onNavigate }) => {
     try {
       setSaving(true);
       
-      // Simular salvamento do perfil
-      console.log("Saving profile:", userProfile);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Construir objeto de usuário preservando dados existentes
+      const userInfo = {
+        id: state.user?.id || null,
+        name: userProfile.name,
+        email: userProfile.email,
+        workspace_name: state.user?.workspace_name || `${userProfile.name}'s Workspace`,
+        created_at: state.user?.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      // Salvar no banco usando o comando Tauri existente
+      await invoke('save_user_info', { user: userInfo });
+      
+      console.log("Profile saved successfully:", userInfo);
+      
+      // Recarregar dados após salvar
+      await loadAccountData();
       
     } catch (error) {
       console.error("Failed to save profile:", error);
+      // TODO: Mostrar mensagem de erro para o usuário
     } finally {
       setSaving(false);
     }

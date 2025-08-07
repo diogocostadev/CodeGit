@@ -59,7 +59,7 @@ interface PerformanceConfig {
 }
 
 const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
-  const { state } = useAppState();
+  const { state, signOut } = useAppState();
   const [activeTab, setActiveTab] = useState<string>('git');
   const [gitConfig, setGitConfig] = useState<GitConfig>({
     user_name: state.user?.name || '',
@@ -110,6 +110,7 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
+  const [showSignOutModal, setShowSignOutModal] = useState(false);
 
   useEffect(() => {
     loadSettings();
@@ -285,13 +286,26 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
     }
   };
 
+  const handleSignOut = async () => {
+    try {
+      setSaving(true);
+      await signOut();
+      setShowSignOutModal(false);
+    } catch (error) {
+      console.error("Failed to sign out:", error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const tabs = [
     { id: 'git', label: 'Git', icon: '⚙️' },
     { id: 'theme', label: 'Aparência', icon: '🎨' },
     { id: 'editor', label: 'Editor', icon: '📝' },
     { id: 'security', label: 'Segurança', icon: '🛡️' },
     { id: 'notifications', label: 'Notificações', icon: '🔔' },
-    { id: 'performance', label: 'Performance', icon: '⚡' }
+    { id: 'performance', label: 'Performance', icon: '⚡' },
+    { id: 'account', label: 'Conta', icon: '👤' }
   ];
 
   const accentColors = [
@@ -775,6 +789,100 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
           </div>
         );
 
+      case 'account':
+        return (
+          <div className="tab-content">
+            <div className="section">
+              <div className="section-title">Informações da Conta</div>
+              <div className="section-description">
+                Gerencie suas informações pessoais e configurações da conta
+              </div>
+              
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Nome</label>
+                  <input
+                    type="text"
+                    value={state.user?.name || ''}
+                    disabled
+                    style={{ background: 'rgba(30, 41, 59, 0.3)', color: '#94a3b8' }}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Email</label>
+                  <input
+                    type="email"
+                    value={state.user?.email || ''}
+                    disabled
+                    style={{ background: 'rgba(30, 41, 59, 0.3)', color: '#94a3b8' }}
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Nome do Workspace</label>
+                <input
+                  type="text"
+                  value={state.user?.workspace_name || ''}
+                  disabled
+                  style={{ background: 'rgba(30, 41, 59, 0.3)', color: '#94a3b8' }}
+                />
+              </div>
+
+              <div style={{ 
+                marginTop: '48px', 
+                paddingTop: '32px', 
+                borderTop: '1px solid rgba(71, 85, 105, 0.3)' 
+              }}>
+                <div className="section-title" style={{ color: '#ef4444', fontSize: '20px' }}>
+                  Zona de Perigo
+                </div>
+                <div className="section-description" style={{ marginBottom: '24px' }}>
+                  Ações irreversíveis que afetam sua conta
+                </div>
+
+                <button
+                  onClick={() => setShowSignOutModal(true)}
+                  style={{
+                    padding: '12px 24px',
+                    background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                    border: '1px solid #ef4444',
+                    borderRadius: '8px',
+                    color: 'white',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    transition: 'all 150ms ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #dc2626, #b91c1c)';
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  🚪 Desconectar Conta
+                </button>
+
+                <p style={{
+                  fontSize: '13px',
+                  color: '#94a3b8',
+                  marginTop: '12px',
+                  lineHeight: '1.5'
+                }}>
+                  Ao desconectar, você será redirecionado para a tela inicial e poderá 
+                  escolher entre usar sua conta existente ou criar uma nova.
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+
       default:
         return null;
     }
@@ -903,6 +1011,79 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
                 disabled={saving}
               >
                 {saving ? 'Resetando...' : 'Resetar Tudo'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sign Out Modal */}
+      {showSignOutModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <div className="modal-title">🚪 Desconectar Conta</div>
+              <button 
+                className="modal-close"
+                onClick={() => setShowSignOutModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="modal-body">
+              <div style={{
+                display: 'flex',
+                gap: '16px',
+                padding: '16px',
+                background: 'rgba(245, 158, 11, 0.1)',
+                border: '1px solid rgba(245, 158, 11, 0.3)',
+                borderRadius: '8px',
+                marginBottom: '24px'
+              }}>
+                <div style={{ fontSize: '24px', flexShrink: 0 }}>⚠️</div>
+                <div style={{ flex: 1, color: '#f1f5f9' }}>
+                  <div style={{ fontWeight: '600', marginBottom: '8px' }}>
+                    Tem certeza que deseja desconectar?
+                  </div>
+                  <div style={{ fontSize: '14px', lineHeight: '1.4', color: '#e2e8f0' }}>
+                    Você será redirecionado para a tela inicial onde poderá:
+                  </div>
+                  <ul style={{ 
+                    fontSize: '14px', 
+                    lineHeight: '1.4', 
+                    color: '#e2e8f0',
+                    marginTop: '8px',
+                    paddingLeft: '20px' 
+                  }}>
+                    <li>Fazer login com sua conta existente ({state.user?.email})</li>
+                    <li>Ou criar uma nova conta</li>
+                  </ul>
+                  <div style={{ 
+                    fontSize: '13px', 
+                    color: '#94a3b8', 
+                    marginTop: '12px',
+                    fontStyle: 'italic'
+                  }}>
+                    Seus dados permanecerão salvos e poderão ser restaurados.
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="modal-footer">
+              <button 
+                className="modal-btn cancel"
+                onClick={() => setShowSignOutModal(false)}
+              >
+                Cancelar
+              </button>
+              <button 
+                className="modal-btn reset"
+                onClick={handleSignOut}
+                disabled={saving}
+              >
+                {saving ? 'Desconectando...' : 'Sim, Desconectar'}
               </button>
             </div>
           </div>

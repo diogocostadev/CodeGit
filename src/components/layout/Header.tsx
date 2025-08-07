@@ -13,6 +13,9 @@ interface HeaderProps {
   onLayoutChange: (changes: Partial<HeaderState>) => void;
   onSidebarToggle: () => void;
   onDetailsPanelToggle: () => void;
+  onShowFilter?: () => void;
+  onShowOrganizations?: () => void;
+  onShowDiscovery?: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -20,7 +23,10 @@ const Header: React.FC<HeaderProps> = ({
   layout,
   onLayoutChange,
   onSidebarToggle,
-  onDetailsPanelToggle
+  onDetailsPanelToggle,
+  onShowFilter,
+  onShowOrganizations,
+  onShowDiscovery
 }) => {
   const { signOut } = useAppState();
   const [searchFocused, setSearchFocused] = useState(false);
@@ -217,6 +223,48 @@ const Header: React.FC<HeaderProps> = ({
           )}
         </div>
 
+        {/* Repository Actions - Moved from sidebar */}
+        {onShowFilter && (
+          <button
+            className="header-button filter-button"
+            onClick={onShowFilter}
+            title="Filter repositories by status, organization, or other criteria"
+            aria-label="Open repository filters"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M3.5 2.75a.75.75 0 00-1.5 0v8.5a.75.75 0 001.5 0v-3.5h4a.75.75 0 000-1.5h-4v-3.5zM14 7a.75.75 0 01-.75.75h-4a.75.75 0 010-1.5h4A.75.75 0 0114 7zM14 11.25a.75.75 0 01-.75.75h-4a.75.75 0 010-1.5h4a.75.75 0 01.75.75z"/>
+            </svg>
+          </button>
+        )}
+
+        {onShowOrganizations && (
+          <button
+            className="header-button organizations-button"
+            onClick={onShowOrganizations}
+            title="Create and manage organizations to group your repositories"
+            aria-label="Manage organizations"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M1.75 2h12.5c.966 0 1.75.784 1.75 1.75v8.5A1.75 1.75 0 0114.25 14H1.75A1.75 1.75 0 010 12.25v-8.5C0 2.784.784 2 1.75 2zM1.5 12.251c0 .138.112.25.25.25h12.5a.25.25 0 00.25-.25V9.5h-13v2.751zm13-8.501a.25.25 0 00-.25-.25H1.75a.25.25 0 00-.25.25V8h13V3.75z"/>
+              <path d="M9.5 5.5a.5.5 0 01.5-.5h4a.5.5 0 010 1h-4a.5.5 0 01-.5-.5zM2.5 5.5a.5.5 0 01.5-.5h4a.5.5 0 010 1H3a.5.5 0 01-.5-.5z"/>
+            </svg>
+          </button>
+        )}
+
+        {onShowDiscovery && (
+          <button
+            className="header-button discovery-button"
+            onClick={onShowDiscovery}
+            title="Discover and add Git repositories from your file system"
+            aria-label="Discover repositories"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M6.22 8.72a.75.75 0 001.06 0l5.22-5.22V6.25a.75.75 0 001.5 0V3.5a.75.75 0 00-.75-.75h-2.75a.75.75 0 000 1.5h2.69L7.28 9.15a.75.75 0 000 1.06z"/>
+              <path d="M3.25 3.25h3a.75.75 0 000-1.5h-3A1.75 1.75 0 001.5 3.5v9c0 .966.784 1.75 1.75 1.75h9A1.75 1.75 0 0014 12.5v-3a.75.75 0 00-1.5 0v3a.25.25 0 01-.25.25h-9a.25.25 0 01-.25-.25v-9a.25.25 0 01.25-.25z"/>
+            </svg>
+          </button>
+        )}
+
         {/* Database Debug - Temporary */}
         <button
           className="header-button db-debug-button"
@@ -307,16 +355,6 @@ const Header: React.FC<HeaderProps> = ({
                   Preferences
                 </button>
                 <button className="user-menu-item">About</button>
-                <div className="user-menu-divider"></div>
-                <button 
-                  className="user-menu-item"
-                  onClick={async () => {
-                    onLayoutChange({ user_menu_open: false });
-                    await signOut();
-                  }}
-                >
-                  Sign Out
-                </button>
               </div>
             </div>
           )}

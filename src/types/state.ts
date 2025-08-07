@@ -310,6 +310,7 @@ export interface AppState {
   
   // Onboarding state
   is_first_time: boolean;
+  show_user_selection: boolean;
   
   // User information
   user?: UserInfo;

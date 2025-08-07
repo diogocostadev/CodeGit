@@ -9,6 +9,9 @@ import './MainLayout.css';
 
 const MainLayout: React.FC = () => {
   const { state, setLayout, setCurrentRepository, setViewMode } = useAppState();
+  const [showFilter, setShowFilter] = React.useState(false);
+  const [showOrganizations, setShowOrganizations] = React.useState(false);
+  const [showDiscovery, setShowDiscovery] = React.useState(false);
 
   const handleLayoutChange = useCallback((layoutChanges: Partial<LayoutState>) => {
     const newLayout = { ...state.layout, ...layoutChanges };
@@ -82,6 +85,9 @@ const MainLayout: React.FC = () => {
         onLayoutChange={(headerChanges) => handleLayoutChange({ header: headerChanges })}
         onSidebarToggle={handleSidebarToggle}
         onDetailsPanelToggle={handleDetailsPanelToggle}
+        onShowFilter={() => setShowFilter(true)}
+        onShowOrganizations={() => setShowOrganizations(true)}
+        onShowDiscovery={() => setShowDiscovery(true)}
       />
 
       {/* Main Content Area */}
@@ -95,6 +101,12 @@ const MainLayout: React.FC = () => {
               selectedRepository={state.current_repository}
               onRepositorySelect={handleRepositorySelect}
               onLayoutChange={(sidebarChanges) => handleLayoutChange({ sidebar: { ...state.layout.sidebar, ...sidebarChanges } })}
+              showFilter={showFilter}
+              showOrganizations={showOrganizations}
+              showDiscovery={showDiscovery}
+              onCloseFilter={() => setShowFilter(false)}
+              onCloseOrganizations={() => setShowOrganizations(false)}
+              onCloseDiscovery={() => setShowDiscovery(false)}
             />
             <div 
               className="resize-handle resize-handle-vertical"

@@ -108,7 +108,8 @@ const createDefaultAppState = (): AppState => ({
     cache_hit_rate: 0,
     last_measured: Date.now()
   },
-  is_first_time: true
+  is_first_time: true,
+  show_user_selection: false
 });
 
 // Action types
@@ -132,7 +133,10 @@ type AppAction =
   | { type: 'RESET_STATE' }
   | { type: 'LOAD_PERSISTED_STATE'; payload: Partial<AppState> }
   | { type: 'COMPLETE_ONBOARDING' }
-  | { type: 'SET_USER_INFO'; payload: UserInfo };
+  | { type: 'SET_USER_INFO'; payload: UserInfo }
+  | { type: 'SHOW_USER_SELECTION' }
+  | { type: 'HIDE_USER_SELECTION' }
+  | { type: 'LOAD_EXISTING_USER'; payload: UserInfo };
 
 // Reducer
 const appStateReducer = (state: AppState, action: AppAction): AppState => {
@@ -338,6 +342,27 @@ const appStateReducer = (state: AppState, action: AppAction): AppState => {
         user: action.payload
       };
 
+    case 'SHOW_USER_SELECTION':
+      return {
+        ...state,
+        show_user_selection: true,
+        is_first_time: false
+      };
+
+    case 'HIDE_USER_SELECTION':
+      return {
+        ...state,
+        show_user_selection: false
+      };
+
+    case 'LOAD_EXISTING_USER':
+      return {
+        ...state,
+        user: action.payload,
+        show_user_selection: false,
+        is_first_time: false
+      };
+
     default:
       return state;
   }
@@ -368,6 +393,7 @@ interface AppStateContextValue {
   completeOnboarding: () => Promise<void>;
   setUserInfo: (user: UserInfo) => Promise<void>;
   signOut: () => Promise<void>;
+  loadExistingUser: (user: UserInfo) => Promise<void>;
 }
 
 const AppStateContext = createContext<AppStateContextValue | undefined>(undefined);
@@ -594,14 +620,39 @@ export const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) 
 
   const signOut = useCallback(async () => {
     try {
-      // Clear database (reset to first time state)
-      await databaseService.signOut?.();
+      // Clear session state but keep database data
+      // This allows user to choose between existing account or new one
+      dispatch({ type: 'SHOW_USER_SELECTION' });
     } catch (error) {
-      // Ignore database errors on sign out
+      console.error('Error during sign out:', error);
+      // In case of error, still show user selection
+      dispatch({ type: 'SHOW_USER_SELECTION' });
     }
-    
-    // Reset state to initial/first time state
-    dispatch({ type: 'RESET_STATE' });
+  }, []);
+
+  const loadExistingUser = useCallback(async (user: UserInfo) => {
+    try {
+      // Load existing user data into the state
+      // This bypasses onboarding and loads saved workspace/organizations
+      const persistedState = await loadStateFromDatabase();
+      
+      if (persistedState) {
+        // Load full persisted state with the user data
+        dispatch({ type: 'LOAD_PERSISTED_STATE', payload: {
+          ...persistedState,
+          user,
+          is_first_time: false,
+          show_user_selection: false
+        }});
+      } else {
+        // If no persisted state, just load the user
+        dispatch({ type: 'LOAD_EXISTING_USER', payload: user });
+      }
+    } catch (error) {
+      console.error('Error loading existing user:', error);
+      // Fall back to just loading user data
+      dispatch({ type: 'LOAD_EXISTING_USER', payload: user });
+    }
   }, []);
 
   // Load state from SQLite on mount
@@ -651,7 +702,8 @@ export const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) 
     resetState,
     completeOnboarding,
     setUserInfo,
-    signOut
+    signOut,
+    loadExistingUser
   };
 
   // Don't render children until state is loaded
