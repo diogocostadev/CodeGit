@@ -1,142 +1,186 @@
-# Logs
-logs
-*.log
+# ===== NODE.JS / NPM =====
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage directory used by tools like istanbul
-coverage
-*.lcov
-
-# nyc test coverage
-.nyc_output
-
-# Dependency directories
-node_modules/
-jspm_packages/
-
-# Snowpack dependency directory (https://snowpack.dev/)
-web_modules/
-
-# TypeScript cache
-*.tsbuildinfo
-
-# Optional npm cache directory
 .npm
+.yarn-integrity
 
-# Optional eslint cache
-.eslintcache
+# Package locks (keep package-lock.json, remove others)
+yarn.lock
+pnpm-lock.yaml
 
-# Optional stylelint cache
-.stylelintcache
+# ===== TAURI SPECIFIC =====
+# Rust build artifacts
+src-tauri/target/
 
-# Microbundle cache
+# Tauri generated files
+src-tauri/gen/
+
+# Keep Cargo.lock for applications (remove this line for libraries)
+# src-tauri/Cargo.lock
+
+# ===== FRONTEND BUILD =====
+# Vite build output
+dist/
+dist-ssr/
+
+# Build directories
+build/
+out/
+
+# Vite cache
+.vite/
+
+# ===== TYPESCRIPT =====
+*.tsbuildinfo
+.tsbuildinfo
+
+# ===== ENVIRONMENT VARIABLES =====
+.env
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production
+.env.production.local
+
+# ===== CACHE DIRECTORIES =====
+.cache/
+.parcel-cache/
 .rpt2_cache/
 .rts2_cache_cjs/
 .rts2_cache_es/
 .rts2_cache_umd/
 
-# Optional REPL history
-.node_repl_history
+# ===== TESTING & COVERAGE =====
+coverage/
+*.lcov
+.nyc_output
+junit.xml
 
-# Output of 'npm pack'
-*.tgz
+# ===== LOGS =====
+logs/
+*.log
+.pnpm-debug.log*
 
-# Yarn Integrity file
-.yarn-integrity
-
-# dotenv environment variable files
-.env
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
-
-# parcel-bundler cache (https://parceljs.org/)
-.cache
-.parcel-cache
-
-# Next.js build output
-.next
-out
-
-# Nuxt.js build / generate output
-.nuxt
-dist
-
-# Gatsby files
-.cache/
-# Comment in the public line in if your project uses Gatsby and not Next.js
-# https://nextjs.org/blog/next-9-1#public-directory-support
-# public
-
-# vuepress build output
-.vuepress/dist
-
-# vuepress v2.x temp and cache directory
-.temp
-
-# Docusaurus cache and generated files
-.docusaurus
-
-# Serverless directories
-.serverless/
-
-# FuseBox cache
-.fusebox/
-
-# DynamoDB Local files
-.dynamodb/
-
-# TernJS port file
-.tern-port
-
-# Stores VSCode versions used for testing VSCode extensions
-.vscode-test
-
-# yarn v2
-.yarn/cache
-.yarn/unplugged
-.yarn/build-state.yml
-.yarn/install-state.gz
-.pnp.*
-
-# Tauri specific
-src-tauri/target/
-src-tauri/Cargo.lock
-
-# IDE
+# ===== IDE & EDITORS =====
+# VS Code
 .vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# JetBrains IDEs
 .idea/
+*.iml
+*.iws
+*.ipr
+
+# Vim
 *.swp
 *.swo
 *~
 
-# OS generated files
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+
+# ===== OPERATING SYSTEM =====
+# macOS
 .DS_Store
 .DS_Store?
 ._*
+.AppleDouble
+.LSOverride
 .Spotlight-V100
 .Trashes
-ehthumbs.db
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.fseventsd
+
+# Windows
 Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
 
-# Build outputs
-/dist
-/build
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
 
-# Local development
-*.local
+# ===== RUNTIME DATA =====
+pids/
+*.pid
+*.seed
+*.pid.lock
 
-# Package locks (keep only one)
-package-lock.json
-yarn.lock
+# ===== TEMPORARY FILES =====
+*.tmp
+*.temp
+.tmp/
+.temp/
+
+# ===== ARCHIVES =====
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+*.tgz
+
+# ===== APPLICATION SPECIFIC =====
+# CodeGit specific ignores
+codegit-data/
+user-preferences.json
+repositories-cache.json
+
+# Development and setup files
+fix-msvc-env.cmd
+setup-msvc-env.bat
+test-after-install.bat
+verify-build-tools.bat
+WINDOWS_SETUP.md
+FINAL_SETUP_INSTRUCTIONS.md
+IMPLEMENTATION_COMPLETE.md
+PROGRESS_TRACKER.md
+REFACTOR_PROPOSAL.md
+
+# Claude AI development files
+.claude/
+
+# Backup files
+*.backup
+*.bak
+*.orig
+
+# ===== DOCUMENTATION =====
+# Exclude generated docs but keep source
+docs/build/
+docs/.docusaurus/
+
+# ===== MISC =====
+.eslintcache
+.stylelintcache
