@@ -671,6 +671,49 @@
   flex-direction: column !important;
 }
 
+.modal-container.account-modal {
+  max-width: 1600px !important;
+  width: 96vw !important;
+  height: 92vh !important;
+  max-height: 92vh !important;
+  min-height: 750px !important;
+  margin: 15px !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Sobrepor TODAS as configurações limitantes com máxima especificidade */
+.modal-overlay .modal-container.settings-modal,
+.modal-overlay .modal-container.account-modal {
+  max-width: 1600px !important;
+  width: 96vw !important;
+  height: 92vh !important;
+  max-height: 92vh !important;
+  min-height: 750px !important;
+  margin: 15px !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Sobrepor QUALQUER limitação do design-system */
+div.modal-overlay div.modal-container.settings-modal,
+div.modal-overlay div.modal-container.account-modal {
+  max-width: 1600px !important;
+  width: 96vw !important;
+  height: 92vh !important;
+  max-height: 92vh !important;
+  min-height: 750px !important;
+}
+
+/* Sobrepor configurações do design-system.css */
+.modal-container.settings-modal .modal-content,
+.modal-container.account-modal .modal-content {
+  max-width: none !important;
+  max-height: none !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
 .modal-container.database-debug-modal {
   max-width: 900px !important;
   width: 85vw !important;
@@ -721,6 +764,18 @@
 }
 
 .settings-modal .modal-content {
+  padding: 0 !important;
+  height: calc(92vh - 75px) !important;
+  max-height: calc(92vh - 75px) !important;
+  min-height: calc(750px - 75px) !important;
+  overflow-y: hidden !important;
+  overflow-x: hidden !important;
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.account-modal .modal-content {
   padding: 0 !important;
   height: calc(92vh - 75px) !important;
   max-height: calc(92vh - 75px) !important;
@@ -784,4 +839,33 @@
   .modal-container {
     animation: none;
   }
+}
+
+/* ===== FORÇA BRUTA PARA CORRIGIR MODAIS ===== */
+/* Especificidade máxima para sobrepor QUALQUER CSS */
+div.modal-overlay div.modal-container.settings-modal,
+div.modal-overlay div.modal-container.account-modal,
+.modal-overlay .modal-container.settings-modal,
+.modal-overlay .modal-container.account-modal {
+  max-width: 1600px !important;
+  width: 96vw !important;
+  height: 92vh !important;
+  max-height: 92vh !important;
+  min-height: 750px !important;
+  margin: 10px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
+}
+
+/* Força o modal-content a ocupar todo o espaço disponível */
+div.modal-overlay div.modal-container.settings-modal div.modal-content,
+div.modal-overlay div.modal-container.account-modal div.modal-content {
+  max-width: none !important;
+  max-height: none !important;
+  width: 100% !important;
+  height: 100% !important;
+  flex: 1 !important;
+  overflow: hidden !important;
+  padding: 0 !important;
 }

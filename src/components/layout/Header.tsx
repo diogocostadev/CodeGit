@@ -348,7 +348,7 @@ const Header: React.FC<HeaderProps> = ({
       {/* Account Modal */}
       {accountOpen && (
         <div className="modal-overlay" onClick={() => setAccountOpen(false)}>
-          <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-container account-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Account</h2>
               <button 
