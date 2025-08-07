@@ -18,6 +18,8 @@ const UserOnboarding: React.FC<UserOnboardingProps> = ({ onComplete }) => {
     name: 'Personal',
     color: '#3b82f6'
   });
+  const [isCompleting, setIsCompleting] = useState(false);
+  const [debugMessage, setDebugMessage] = useState('');
 
   const predefinedColors = [
     '#3b82f6', '#ef4444', '#10b981', '#f59e0b', 
@@ -25,8 +27,15 @@ const UserOnboarding: React.FC<UserOnboardingProps> = ({ onComplete }) => {
     '#ec4899', '#6366f1', '#14b8a6', '#eab308'
   ];
 
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleUserSubmit = () => {
-    if (!userData.name.trim() || !userData.email.trim()) return;
+    if (!userData.name.trim() || !userData.email.trim() || !isValidEmail(userData.email.trim())) {
+      return;
+    }
     
     // Save user info
     const userInfo = {
@@ -37,7 +46,6 @@ const UserOnboarding: React.FC<UserOnboardingProps> = ({ onComplete }) => {
     };
     
     setUserInfo(userInfo);
-    console.log('✅ Dados do usuário salvos:', userInfo);
     
     // Update workspace name if provided
     if (userData.workspaceName.trim()) {
@@ -80,8 +88,40 @@ const UserOnboarding: React.FC<UserOnboardingProps> = ({ onComplete }) => {
     setStep(3);
   };
 
-  const handleComplete = () => {
-    onComplete();
+  const handleComplete = async () => {
+    if (isCompleting) return;
+    
+    setIsCompleting(true);
+    setDebugMessage('🚀 Starting completion process...');
+    
+    try {
+      setDebugMessage('📞 Calling onComplete function...');
+      
+      if (typeof onComplete !== 'function') {
+        setDebugMessage('❌ onComplete is not a function!');
+        return;
+      }
+      
+      const result = onComplete();
+      
+      if (result && typeof result.then === 'function') {
+        setDebugMessage('⏳ Waiting for completion...');
+        await result;
+        setDebugMessage('✅ Completion successful!');
+      } else {
+        setDebugMessage('✅ Completion called successfully!');
+      }
+      
+      // Give user time to see the success message
+      setTimeout(() => {
+        setDebugMessage('');
+        setIsCompleting(false);
+      }, 2000);
+      
+    } catch (error: any) {
+      setDebugMessage(`❌ Error: ${error?.message || 'Unknown error'}`);
+      setIsCompleting(false);
+    }
   };
 
   return (
@@ -125,7 +165,11 @@ const UserOnboarding: React.FC<UserOnboardingProps> = ({ onComplete }) => {
                   value={userData.email}
                   onChange={(e) => setUserData({...userData, email: e.target.value})}
                   placeholder="your.email@example.com"
+                  className={userData.email.trim() && !isValidEmail(userData.email.trim()) ? 'error' : ''}
                 />
+                {userData.email.trim() && !isValidEmail(userData.email.trim()) && (
+                  <span className="error-message">Please enter a valid email address</span>
+                )}
               </div>
 
               <div className="form-group">
@@ -141,7 +185,7 @@ const UserOnboarding: React.FC<UserOnboardingProps> = ({ onComplete }) => {
               <button 
                 className="next-button"
                 onClick={handleUserSubmit}
-                disabled={!userData.name.trim() || !userData.email.trim()}
+                disabled={!userData.name.trim() || !userData.email.trim() || !isValidEmail(userData.email.trim())}
               >
                 Continue →
               </button>
@@ -230,12 +274,38 @@ const UserOnboarding: React.FC<UserOnboardingProps> = ({ onComplete }) => {
                 </div>
               </div>
 
-              <button 
-                className="finish-button"
-                onClick={handleComplete}
-              >
-                Get Started 🚀
-              </button>
+              {debugMessage && (
+                <div style={{
+                  background: debugMessage.includes('❌') ? 'rgba(239, 68, 68, 0.1)' : 'rgba(59, 130, 246, 0.1)',
+                  border: '1px solid',
+                  borderColor: debugMessage.includes('❌') ? '#ef4444' : '#3b82f6',
+                  color: debugMessage.includes('❌') ? '#ef4444' : '#3b82f6',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  marginBottom: '16px',
+                  fontSize: '14px',
+                  textAlign: 'center'
+                }}>
+                  {debugMessage}
+                </div>
+              )}
+
+              <div className="button-group">
+                <button 
+                  className="back-button"
+                  onClick={() => setStep(2)}
+                  disabled={isCompleting}
+                >
+                  ← Back
+                </button>
+                <button 
+                  className="finish-button"
+                  onClick={handleComplete}
+                  disabled={isCompleting}
+                >
+                  {isCompleting ? 'Processing...' : 'Get Started 🚀'}
+                </button>
+              </div>
             </div>
           )}
         </div>

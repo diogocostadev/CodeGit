@@ -367,6 +367,7 @@ interface AppStateContextValue {
   resetState: () => void;
   completeOnboarding: () => Promise<void>;
   setUserInfo: (user: UserInfo) => Promise<void>;
+  signOut: () => Promise<void>;
 }
 
 const AppStateContext = createContext<AppStateContextValue | undefined>(undefined);
@@ -379,6 +380,11 @@ export const useAppState = () => {
   }
   return context;
 };
+
+// Add explicit export for Fast Refresh compatibility
+if (import.meta.hot) {
+  import.meta.hot.accept();
+}
 
 // SQLite persistence helpers
 const loadStateFromDatabase = async (): Promise<Partial<AppState> | null> => {
@@ -552,16 +558,20 @@ export const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) 
   }, []);
 
   const completeOnboarding = useCallback(async () => {
-    try {
-      await databaseService.completeOnboarding();
-      dispatch({ type: 'COMPLETE_ONBOARDING' });
-    } catch (error) {
-      console.error('Failed to complete onboarding in database:', error);
-    }
+    // Complete onboarding in state immediately
+    dispatch({ type: 'COMPLETE_ONBOARDING' });
+    
+    // Try to save to database in background (don't block UI)
+    setTimeout(async () => {
+      try {
+        await databaseService.completeOnboarding();
+      } catch (error) {
+        // Silently fail - onboarding still works in memory
+      }
+    }, 100);
   }, []);
 
   const setUserInfo = useCallback(async (user: UserInfo) => {
-    console.log('🔄 Atualizando dados do usuário no estado:', user);
     try {
       await databaseService.saveUser({
         name: user.name,
@@ -574,33 +584,37 @@ export const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) 
     }
   }, []);
 
+  const signOut = useCallback(async () => {
+    try {
+      // Clear database (reset to first time state)
+      await databaseService.signOut?.();
+    } catch (error) {
+      // Ignore database errors on sign out
+    }
+    
+    // Reset state to initial/first time state
+    dispatch({ type: 'RESET_STATE' });
+  }, []);
+
   // Load state from SQLite on mount
   useEffect(() => {
     const loadInitialState = async () => {
       try {
-        console.log('🚀 Starting app initialization...');
         setIsLoading(true);
         
         // Try to migrate from localStorage first
-        console.log('🔄 Attempting localStorage migration...');
         await databaseService.migrateFromLocalStorage();
         
         // Load state from database
-        console.log('📖 Loading state from database...');
         const persistedState = await loadStateFromDatabase();
-        console.log('📊 Persisted state loaded:', persistedState);
         
         if (persistedState) {
           dispatch({ type: 'LOAD_PERSISTED_STATE', payload: persistedState });
-          console.log('✅ State loaded successfully');
-        } else {
-          console.log('⚠️ No persisted state found - using default state');
         }
       } catch (error) {
         console.error('❌ Failed to load initial state:', error);
       } finally {
         setIsLoading(false);
-        console.log('🏁 App initialization complete');
       }
     };
     
@@ -628,7 +642,8 @@ export const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) 
     clearErrors,
     resetState,
     completeOnboarding,
-    setUserInfo
+    setUserInfo,
+    signOut
   };
 
   // Don't render children until state is loaded

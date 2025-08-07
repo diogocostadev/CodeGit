@@ -18,20 +18,14 @@ const App = () => {
 const AppContent = () => {
   const { state, completeOnboarding } = useAppState();
   
-  // Debug logs
-  console.log('🐛 AppContent - is_first_time:', state.is_first_time);
-  console.log('🐛 AppContent - user:', state.user);
-  console.log('🐛 AppContent - full state:', state);
-  
-  // Show onboarding if it's first time OR if there's no user data
-  const shouldShowOnboarding = state.is_first_time || !state.user || !state.user.name || !state.user.email;
+  // Show onboarding only if it's first time AND we haven't completed onboarding
+  // After completion, is_first_time becomes false
+  const shouldShowOnboarding = state.is_first_time;
   
   if (shouldShowOnboarding) {
-    console.log('👋 Showing onboarding screen');
     return <UserOnboarding onComplete={completeOnboarding} />;
   }
   
-  console.log('🏠 Showing main app interface');
   return (
     <div className="app">
       <MainLayout />

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AppState, HeaderState, Notification } from '../../types/state';
 import { useSmartNotifications } from '../../hooks/useSmartNotifications';
+import { useAppState } from '../../contexts/AppStateContext';
 import Settings from '../../Settings';
 import Account from '../../Account';
 import './Header.css';
@@ -20,6 +21,7 @@ const Header: React.FC<HeaderProps> = ({
   onSidebarToggle,
   onDetailsPanelToggle
 }) => {
+  const { signOut } = useAppState();
   const [searchFocused, setSearchFocused] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -68,9 +70,6 @@ const Header: React.FC<HeaderProps> = ({
   const currentWorkspace = appState.workspaces[appState.active_workspace];
   const notificationStats = getNotificationStats();
 
-  // Debug: log user data
-  console.log('🐛 Header - User data:', appState.user);
-  console.log('🐛 Header - Full appState:', appState);
 
   return (
     <header className="app-header">
@@ -283,18 +282,8 @@ const Header: React.FC<HeaderProps> = ({
                 <button 
                   className="user-menu-item"
                   onClick={async () => {
-                    // Reset app state and force onboarding
-                    try {
-                      // Clear localStorage
-                      localStorage.clear();
-                      
-                      // Reset database to first time state (optional - could also clear all data)
-                      // For now, just restart the app which will trigger onboarding
-                      window.location.reload();
-                    } catch (error) {
-                      console.error('Error during sign out:', error);
-                      window.location.reload(); // Force reload as fallback
-                    }
+                    onLayoutChange({ user_menu_open: false });
+                    await signOut();
                   }}
                 >
                   Sign Out
