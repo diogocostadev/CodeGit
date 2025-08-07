@@ -210,12 +210,12 @@ pub async fn verify_data_migration(db_state: State<'_, DatabaseState>) -> Result
 #[tauri::command]
 pub async fn migrate_from_localstorage(
     db_state: State<'_, DatabaseState>,
-    localStorage_data: serde_json::Value,
+    local_storage_data: serde_json::Value,
 ) -> Result<(), String> {
     let db = db_state.lock().await;
 
     // Parse localStorage data and migrate to SQLite
-    if let Some(state) = localStorage_data.get("state") {
+    if let Some(state) = local_storage_data.get("state") {
         // Migrate user data
         if let Some(user_data) = state.get("user") {
             let user_info = UserInfo {

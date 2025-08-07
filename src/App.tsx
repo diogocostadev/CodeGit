@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { AppStateProvider, useAppState } from './contexts/AppStateContext';
 import MainLayout from './components/layout/MainLayout';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -17,6 +17,19 @@ const App = () => {
 
 const AppContent = () => {
   const { state, completeOnboarding } = useAppState();
+  
+  // Dev helper: Cmd+R to reload
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'r') {
+        e.preventDefault();
+        window.location.reload();
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
   
   // Show onboarding only if it's first time AND we haven't completed onboarding
   // After completion, is_first_time becomes false

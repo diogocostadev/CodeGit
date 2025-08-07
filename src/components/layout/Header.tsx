@@ -326,7 +326,7 @@ const Header: React.FC<HeaderProps> = ({
       {/* Settings Modal */}
       {settingsOpen && (
         <div className="modal-overlay" onClick={() => setSettingsOpen(false)}>
-          <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-container settings-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Settings</h2>
               <button 
@@ -370,7 +370,7 @@ const Header: React.FC<HeaderProps> = ({
       {/* Database Debug Modal */}
       {dbDebugOpen && (
         <div className="modal-overlay" onClick={() => setDbDebugOpen(false)}>
-          <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px' }}>
+          <div className="modal-container database-debug-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Database Debug Info</h2>
               <button 
