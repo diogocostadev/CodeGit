@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { AppState, HeaderState, Notification } from '../../types/state';
 import { useSmartNotifications } from '../../hooks/useSmartNotifications';
 import { useAppState } from '../../contexts/AppStateContext';
+import { invoke } from '@tauri-apps/api/tauri';
 import Settings from '../../Settings';
 import Account from '../../Account';
 import './Header.css';
@@ -26,6 +27,8 @@ const Header: React.FC<HeaderProps> = ({
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [dbDebugOpen, setDbDebugOpen] = useState(false);
+  const [dbInfo, setDbInfo] = useState<any>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
 
@@ -55,6 +58,15 @@ const Header: React.FC<HeaderProps> = ({
 
   const toggleUserMenu = () => {
     onLayoutChange({ user_menu_open: !layout.user_menu_open });
+  };
+
+  const checkDatabase = async () => {
+    try {
+      const info = await invoke('get_database_info');
+      setDbInfo(info);
+    } catch (error) {
+      setDbInfo({ error: String(error) });
+    }
   };
 
   // Use smart notifications system
@@ -205,6 +217,19 @@ const Header: React.FC<HeaderProps> = ({
           )}
         </div>
 
+        {/* Database Debug - Temporary */}
+        <button
+          className="header-button db-debug-button"
+          onClick={() => {
+            setDbDebugOpen(!dbDebugOpen);
+            if (!dbDebugOpen) checkDatabase();
+          }}
+          title="Database Debug"
+          style={{ background: dbDebugOpen ? '#374151' : 'transparent' }}
+        >
+          🗄️
+        </button>
+
         {/* Settings */}
         <button
           className="header-button settings-button"
@@ -255,6 +280,10 @@ const Header: React.FC<HeaderProps> = ({
                 <div className="user-details">
                   <div className="user-name">{appState.user?.name || 'User'}</div>
                   <div className="user-email">{appState.user?.email || 'user@example.com'}</div>
+                  {/* Debug info - temporary */}
+                  <div style={{fontSize: '10px', color: '#666', marginTop: '4px'}}>
+                    DEBUG: {appState.user ? `Loaded: ${appState.user.name}` : 'No user data'}
+                  </div>
                 </div>
               </div>
               <div className="user-menu-divider"></div>
@@ -333,6 +362,80 @@ const Header: React.FC<HeaderProps> = ({
             </div>
             <div className="modal-content">
               <Account onNavigate={() => setAccountOpen(false)} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Database Debug Modal */}
+      {dbDebugOpen && (
+        <div className="modal-overlay" onClick={() => setDbDebugOpen(false)}>
+          <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px' }}>
+            <div className="modal-header">
+              <h2>Database Debug Info</h2>
+              <button 
+                className="modal-close-button"
+                onClick={() => setDbDebugOpen(false)}
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"/>
+                </svg>
+              </button>
+            </div>
+            <div className="modal-content">
+              <div style={{ marginBottom: '16px' }}>
+                <button 
+                  onClick={checkDatabase}
+                  style={{
+                    background: '#3b82f6',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '8px 16px',
+                    fontSize: '14px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Refresh Database Info
+                </button>
+              </div>
+              
+              <div style={{ marginBottom: '16px' }}>
+                <h3 style={{ color: '#f9fafb', marginBottom: '8px' }}>Current App State:</h3>
+                <div style={{
+                  background: '#1f2937',
+                  border: '1px solid #374151',
+                  borderRadius: '6px',
+                  padding: '12px',
+                  fontSize: '12px',
+                  color: '#d1d5db',
+                  fontFamily: 'monospace'
+                }}>
+                  <div>User: {appState.user ? `${appState.user.name} (${appState.user.email})` : 'NULL'}</div>
+                  <div>Is First Time: {appState.is_first_time ? 'YES' : 'NO'}</div>
+                  <div>Active Workspace: {appState.active_workspace}</div>
+                  <div>Workspaces: {Object.keys(appState.workspaces).length}</div>
+                </div>
+              </div>
+
+              {dbInfo && (
+                <div>
+                  <h3 style={{ color: '#f9fafb', marginBottom: '8px' }}>SQLite Database:</h3>
+                  <div style={{
+                    background: '#1f2937',
+                    border: '1px solid #374151',
+                    borderRadius: '6px',
+                    padding: '12px',
+                    fontSize: '11px',
+                    color: '#d1d5db',
+                    fontFamily: 'monospace',
+                    maxHeight: '300px',
+                    overflow: 'auto'
+                  }}>
+                    <pre>{JSON.stringify(dbInfo, null, 2)}</pre>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

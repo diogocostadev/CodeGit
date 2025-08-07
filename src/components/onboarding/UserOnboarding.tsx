@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppState } from '../../contexts/AppStateContext';
+import { invoke } from '@tauri-apps/api/tauri';
 import './UserOnboarding.css';
 
 interface UserOnboardingProps {
-  onComplete: () => void;
+  onComplete: () => void | Promise<void>;
 }
 
 const UserOnboarding: React.FC<UserOnboardingProps> = ({ onComplete }) => {
@@ -20,6 +21,8 @@ const UserOnboarding: React.FC<UserOnboardingProps> = ({ onComplete }) => {
   });
   const [isCompleting, setIsCompleting] = useState(false);
   const [debugMessage, setDebugMessage] = useState('');
+  const [dbInfo, setDbInfo] = useState<any>(null);
+
 
   const predefinedColors = [
     '#3b82f6', '#ef4444', '#10b981', '#f59e0b', 
@@ -104,7 +107,7 @@ const UserOnboarding: React.FC<UserOnboardingProps> = ({ onComplete }) => {
       
       const result = onComplete();
       
-      if (result && typeof result.then === 'function') {
+      if (result instanceof Promise) {
         setDebugMessage('⏳ Waiting for completion...');
         await result;
         setDebugMessage('✅ Completion successful!');
@@ -121,6 +124,15 @@ const UserOnboarding: React.FC<UserOnboardingProps> = ({ onComplete }) => {
     } catch (error: any) {
       setDebugMessage(`❌ Error: ${error?.message || 'Unknown error'}`);
       setIsCompleting(false);
+    }
+  };
+
+  const checkDatabase = async () => {
+    try {
+      const info = await invoke('get_database_info');
+      setDbInfo(info);
+    } catch (error) {
+      setDbInfo({ error: error });
     }
   };
 
@@ -289,6 +301,41 @@ const UserOnboarding: React.FC<UserOnboardingProps> = ({ onComplete }) => {
                   {debugMessage}
                 </div>
               )}
+
+              {/* Database Debug Info */}
+              <div style={{ marginBottom: '16px' }}>
+                <button 
+                  onClick={checkDatabase}
+                  style={{
+                    background: '#374151',
+                    color: '#f9fafb',
+                    border: '1px solid #4b5563',
+                    borderRadius: '6px',
+                    padding: '8px 12px',
+                    fontSize: '12px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Check Database Status
+                </button>
+                {dbInfo && (
+                  <div style={{
+                    background: 'rgba(107, 114, 128, 0.1)',
+                    border: '1px solid #4b5563',
+                    borderRadius: '6px',
+                    padding: '8px',
+                    marginTop: '8px',
+                    fontSize: '11px',
+                    color: '#d1d5db',
+                    fontFamily: 'monospace',
+                    textAlign: 'left',
+                    maxHeight: '200px',
+                    overflow: 'auto'
+                  }}>
+                    <pre>{JSON.stringify(dbInfo, null, 2)}</pre>
+                  </div>
+                )}
+              </div>
 
               <div className="button-group">
                 <button 
