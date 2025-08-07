@@ -1,0 +1,294 @@
+/* ===== MAIN LAYOUT STYLES ===== */
+
+.main-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background: var(--bg-primary, #0a0b0d);
+  color: var(--text-primary, #e2e8f0);
+  font-family: var(--font-family, 'Inter', -apple-system, BlinkMacSystemFont, sans-serif);
+}
+
+/* Main content area - tri-panel layout */
+.main-content {
+  display: flex;
+  flex: 1;
+  min-height: 0; /* Important for flexbox overflow */
+  position: relative;
+}
+
+/* ===== RESIZE HANDLES ===== */
+
+.resize-handle {
+  background: transparent;
+  transition: background-color 0.2s ease;
+  user-select: none;
+  z-index: 10;
+}
+
+.resize-handle:hover {
+  background: var(--border-accent, #3b82f6);
+}
+
+.resize-handle-vertical {
+  width: 4px;
+  cursor: col-resize;
+  border-left: 1px solid var(--border-subtle, #1f2937);
+  border-right: 1px solid var(--border-subtle, #1f2937);
+}
+
+.resize-handle-vertical:hover {
+  width: 6px;
+}
+
+.resize-handle-horizontal {
+  height: 4px;
+  cursor: row-resize;
+  border-top: 1px solid var(--border-subtle, #1f2937);
+  border-bottom: 1px solid var(--border-subtle, #1f2937);
+}
+
+/* ===== PANEL ANIMATIONS ===== */
+
+.sidebar-enter {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.sidebar-enter-active {
+  transform: translateX(0);
+  opacity: 1;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.sidebar-exit {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.sidebar-exit-active {
+  transform: translateX(-100%);
+  opacity: 0;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.details-panel-enter {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.details-panel-enter-active {
+  transform: translateX(0);
+  opacity: 1;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.details-panel-exit {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.details-panel-exit-active {
+  transform: translateX(100%);
+  opacity: 0;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+
+/* Tablet landscape and smaller */
+@media (max-width: 1024px) {
+  .main-content {
+    flex-direction: column;
+  }
+  
+  .resize-handle-vertical {
+    display: none; /* Hide vertical resize handles on mobile */
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .main-layout {
+    font-size: 14px;
+  }
+}
+
+/* ===== KEYBOARD SHORTCUTS OVERLAY ===== */
+
+.keyboard-shortcuts-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.keyboard-shortcuts-panel {
+  background: var(--bg-elevated, #1f2937);
+  border: 1px solid var(--border-subtle, #374151);
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* ===== THEME SYSTEM ===== */
+
+/* Light theme */
+[data-theme="light"] .main-layout {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-elevated: #ffffff;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --border-subtle: #e5e7eb;
+  --border-accent: #3b82f6;
+}
+
+/* Dark theme */
+[data-theme="dark"] .main-layout {
+  --bg-primary: #0a0b0d;
+  --bg-secondary: #1f2937;
+  --bg-elevated: #374151;
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --border-subtle: #374151;
+  --border-accent: #60a5fa;
+}
+
+/* High contrast theme */
+[data-theme="high-contrast"] .main-layout {
+  --bg-primary: #000000;
+  --bg-secondary: #1a1a1a;
+  --bg-elevated: #2a2a2a;
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --border-subtle: #555555;
+  --border-accent: #ffff00;
+}
+
+/* Compact mode */
+[data-compact="true"] .main-layout {
+  font-size: 13px;
+  --spacing-unit: 6px;
+  --header-height: 40px;
+}
+
+[data-compact="false"] .main-layout {
+  font-size: 14px;
+  --spacing-unit: 8px;
+  --header-height: 48px;
+}
+
+/* ===== ACCESSIBILITY ===== */
+
+/* Focus indicators */
+.main-layout *:focus {
+  outline: 2px solid var(--border-accent);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .main-layout {
+    --border-subtle: #ffffff;
+    --bg-primary: #000000;
+    --text-primary: #ffffff;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .main-layout * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .resize-handle {
+    transition: none;
+  }
+}
+
+/* ===== LOADING STATES ===== */
+
+.layout-loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.layout-loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--border-accent), transparent);
+  animation: loading-shimmer 1.5s infinite;
+  z-index: 1000;
+}
+
+@keyframes loading-shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* ===== ERROR STATES ===== */
+
+.layout-error {
+  border: 2px solid #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.layout-error-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  padding: 20px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* ===== PERFORMANCE OPTIMIZATIONS ===== */
+
+/* Use hardware acceleration for smooth animations */
+.resize-handle,
+.sidebar-enter-active,
+.sidebar-exit-active,
+.details-panel-enter-active,
+.details-panel-exit-active {
+  transform: translateZ(0); /* Force GPU acceleration */
+  will-change: transform;
+}
+
+/* Optimize for smooth scrolling */
+.main-content * {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .main-content * {
+    scroll-behavior: auto;
+  }
+}
