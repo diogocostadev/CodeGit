@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useAppState } from "./contexts/AppStateContext";
 import "./Settings.css";
 
 interface SettingsProps {
@@ -58,10 +59,11 @@ interface PerformanceConfig {
 }
 
 const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
+  const { state } = useAppState();
   const [activeTab, setActiveTab] = useState<string>('git');
   const [gitConfig, setGitConfig] = useState<GitConfig>({
-    user_name: '',
-    user_email: '',
+    user_name: state.user?.name || '',
+    user_email: state.user?.email || '',
     default_branch: 'main',
     editor: 'code',
     diff_tool: 'vscode',
@@ -111,18 +113,18 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
 
   useEffect(() => {
     loadSettings();
-  }, []);
+  }, [state.user]);
 
   const loadSettings = async () => {
     try {
       setLoading(true);
       // Simular carregamento das configurações
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 300));
       
-      // Configurações mockadas
+      // Carregar dados do usuário do contexto
       setGitConfig({
-        user_name: 'John Doe',
-        user_email: 'john@example.com',
+        user_name: state.user?.name || '',
+        user_email: state.user?.email || '',
         default_branch: 'main',
         editor: 'code',
         diff_tool: 'vscode',

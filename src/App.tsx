@@ -1,19 +1,9 @@
 import React from 'react';
-import { AppStateProvider } from './contexts/AppStateContext';
+import { AppStateProvider, useAppState } from './contexts/AppStateContext';
 import MainLayout from './components/layout/MainLayout';
 import ErrorBoundary from './components/ErrorBoundary';
+import UserOnboarding from './components/onboarding/UserOnboarding';
 import './App.css';
-
-// Import legacy components for backward compatibility (optional)
-import Dashboard from "./Dashboard";
-import CommitHistory from "./CommitHistory";
-import DiffViewer from "./DiffViewer";
-import MergeInteractive from "./MergeInteractive";
-import ConflictResolver from "./ConflictResolver";
-import BranchManager from "./BranchManager";
-import Settings from "./Settings";
-import Account from "./Account";
-import RepositoryCreator from "./RepositoryCreator";
 
 const App = () => {
   return (
@@ -26,6 +16,22 @@ const App = () => {
 };
 
 const AppContent = () => {
+  const { state, completeOnboarding } = useAppState();
+  
+  // Debug logs
+  console.log('🐛 AppContent - is_first_time:', state.is_first_time);
+  console.log('🐛 AppContent - user:', state.user);
+  console.log('🐛 AppContent - full state:', state);
+  
+  // Show onboarding if it's first time OR if there's no user data
+  const shouldShowOnboarding = state.is_first_time || !state.user || !state.user.name || !state.user.email;
+  
+  if (shouldShowOnboarding) {
+    console.log('👋 Showing onboarding screen');
+    return <UserOnboarding onComplete={completeOnboarding} />;
+  }
+  
+  console.log('🏠 Showing main app interface');
   return (
     <div className="app">
       <MainLayout />

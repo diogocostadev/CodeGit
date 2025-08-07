@@ -94,7 +94,7 @@ const MainLayout: React.FC = () => {
               layout={state.layout.sidebar}
               selectedRepository={state.current_repository}
               onRepositorySelect={handleRepositorySelect}
-              onLayoutChange={(sidebarChanges) => handleLayoutChange({ sidebar: sidebarChanges })}
+              onLayoutChange={(sidebarChanges) => handleLayoutChange({ sidebar: { ...state.layout.sidebar, ...sidebarChanges } })}
             />
             <div 
               className="resize-handle resize-handle-vertical"

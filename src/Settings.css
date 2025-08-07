@@ -216,10 +216,18 @@
   to { transform: rotate(360deg); }
 }
 
+/* ===== ÁREA DE CONTEÚDO ===== */
+.settings-content {
+  flex: 1;
+  overflow-y: auto;
+  background: rgba(15, 16, 20, 0.2);
+}
+
 /* ===== CONTEÚDO DAS TABS ===== */
 .tab-content {
   padding: 32px;
   max-width: 800px;
+  height: 100%;
 }
 
 .section {

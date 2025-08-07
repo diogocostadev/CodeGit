@@ -242,7 +242,7 @@
 
 .search-icon {
   position: absolute;
-  left: 12px;
+  left: 14px;
   color: var(--text-secondary);
   z-index: 1;
   pointer-events: none;
@@ -251,7 +251,7 @@
 .search-input {
   width: 100%;
   height: 32px;
-  padding: 0 36px 0 36px;
+  padding: 0 36px 0 50px;
   border: 1px solid var(--border-subtle);
   border-radius: 16px;
   background: var(--bg-input, #374151);
@@ -315,22 +315,6 @@
   color: var(--text-primary);
 }
 
-/* Sync status indicator */
-.sync-status {
-  display: flex;
-  align-items: center;
-  padding: 6px;
-  color: var(--accent-success, #10b981);
-}
-
-.sync-icon.rotating {
-  animation: spin 2s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
 
 /* Notifications */
 .notifications-wrapper {
@@ -367,12 +351,13 @@
   top: calc(100% + 8px);
   right: 0;
   width: 320px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-subtle);
+  background: var(--bg-elevated, #374151);
+  border: 1px solid var(--border-subtle, #4b5563);
   border-radius: 8px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   overflow: hidden;
+  backdrop-filter: blur(8px);
 }
 
 .notifications-header {
@@ -493,12 +478,13 @@
   top: calc(100% + 8px);
   right: 0;
   width: 240px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-subtle);
+  background: var(--bg-elevated, #374151);
+  border: 1px solid var(--border-subtle, #4b5563);
   border-radius: 8px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   overflow: hidden;
+  backdrop-filter: blur(8px);
 }
 
 .user-info {
@@ -606,10 +592,6 @@
 /* ===== ACCESSIBILITY ===== */
 
 @media (prefers-reduced-motion: reduce) {
-  .sync-icon.rotating {
-    animation: none;
-  }
-  
   .header-button,
   .search-input,
   .notification-item {
@@ -630,9 +612,6 @@
 
 /* ===== LOADING STATES ===== */
 
-.header-loading .sync-icon {
-  animation: spin 1s linear infinite;
-}
 
 /* ===== THEME OVERRIDES ===== */
 

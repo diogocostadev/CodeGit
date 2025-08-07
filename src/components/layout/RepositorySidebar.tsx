@@ -121,20 +121,22 @@ const RepositorySidebar: React.FC<RepositorySidebarProps> = ({
   }, []);
 
   const handleOrganizationToggle = useCallback((orgId: string) => {
-    const expanded = layout.expanded_organizations.includes(orgId);
+    const expandedOrgs = layout.expanded_organizations || [];
+    const expanded = expandedOrgs.includes(orgId);
     const newExpanded = expanded
-      ? layout.expanded_organizations.filter(id => id !== orgId)
-      : [...layout.expanded_organizations, orgId];
+      ? expandedOrgs.filter(id => id !== orgId)
+      : [...expandedOrgs, orgId];
     
     onLayoutChange({ expanded_organizations: newExpanded });
   }, [layout.expanded_organizations, onLayoutChange]);
 
   const handleRepositorySelection = useCallback((repoId: string, multiSelect: boolean = false) => {
     if (multiSelect) {
-      const isSelected = layout.selected_repositories.includes(repoId);
+      const selectedRepos = layout.selected_repositories || [];
+      const isSelected = selectedRepos.includes(repoId);
       const newSelected = isSelected
-        ? layout.selected_repositories.filter(id => id !== repoId)
-        : [...layout.selected_repositories, repoId];
+        ? selectedRepos.filter(id => id !== repoId)
+        : [...selectedRepos, repoId];
       
       onLayoutChange({ selected_repositories: newSelected });
     } else {
@@ -246,20 +248,38 @@ const RepositorySidebar: React.FC<RepositorySidebarProps> = ({
       {/* Repository list */}
       <div className="sidebar-content">
         {/* Organizations */}
-        {groupedRepositories.organizations.map(org => (
-          <OrganizationSection
-            key={org.id}
-            organization={org}
-            repositories={org.repositories}
-            isExpanded={layout.expanded_organizations.includes(org.id)}
-            selectedRepository={selectedRepository}
-            selectedRepositories={layout.selected_repositories}
-            onToggle={() => handleOrganizationToggle(org.id)}
-            onRepositorySelect={handleRepositorySelection}
-            onRepositoryContextMenu={handleRepositoryContextMenu}
-            getRepositoryStatusIcon={getRepositoryStatusIcon}
-          />
-        ))}
+        {workspace?.organizations?.length > 0 ? (
+          groupedRepositories.organizations.map(org => (
+            <OrganizationSection
+              key={org.id}
+              organization={org}
+              repositories={org.repositories}
+              isExpanded={(layout.expanded_organizations || []).includes(org.id)}
+              selectedRepository={selectedRepository}
+              selectedRepositories={layout.selected_repositories || []}
+              onToggle={() => handleOrganizationToggle(org.id)}
+              onRepositorySelect={handleRepositorySelection}
+              onRepositoryContextMenu={handleRepositoryContextMenu}
+              getRepositoryStatusIcon={getRepositoryStatusIcon}
+            />
+          ))
+        ) : (
+          <div className="organizations-empty">
+            <div className="empty-organizations-header">
+              <span>Organizations</span>
+              <button 
+                className="create-org-button" 
+                onClick={() => setShowOrganizationManager(true)}
+                title="Create new organization"
+              >
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2a.75.75 0 01.75.75v4.5h4.5a.75.75 0 010 1.5h-4.5v4.5a.75.75 0 01-1.5 0v-4.5h-4.5a.75.75 0 010-1.5h4.5v-4.5A.75.75 0 018 2z"/>
+                </svg>
+              </button>
+            </div>
+            <p className="empty-organizations-hint">Create organizations to group your repositories</p>
+          </div>
+        )}
 
         {/* Ungrouped repositories */}
         {groupedRepositories.ungrouped.length > 0 && (
@@ -274,7 +294,7 @@ const RepositorySidebar: React.FC<RepositorySidebarProps> = ({
                 key={repo.id}
                 repository={repo}
                 isSelected={selectedRepository === repo.id}
-                isMultiSelected={layout.selected_repositories.includes(repo.id)}
+                isMultiSelected={(layout.selected_repositories || []).includes(repo.id)}
                 statusIcon={getRepositoryStatusIcon(repo)}
                 onSelect={(multiSelect) => handleRepositorySelection(repo.id, multiSelect)}
                 onContextMenu={(e) => handleRepositoryContextMenu(e, repo)}
@@ -286,24 +306,25 @@ const RepositorySidebar: React.FC<RepositorySidebarProps> = ({
         {filteredRepositories.length === 0 && (
           <div className="empty-state">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor" opacity="0.3">
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
             <p>No repositories found</p>
+            <p className="empty-hint">Get started by discovering Git repositories on your system</p>
             <button 
               className="add-repository-button"
               onClick={() => setShowRepositoryDiscovery(true)}
             >
-              Discover Repositories
+              🔍 Discover Repositories
             </button>
           </div>
         )}
       </div>
 
       {/* Bulk actions toolbar (shows when multiple repos are selected) */}
-      {layout.selected_repositories.length > 1 && (
+      {(layout.selected_repositories || []).length > 1 && (
         <div className="bulk-actions-toolbar">
           <span className="selected-count">
-            {layout.selected_repositories.length} selected
+            {(layout.selected_repositories || []).length} selected
           </span>
           <div className="bulk-actions">
             <button 
@@ -359,13 +380,13 @@ const RepositorySidebar: React.FC<RepositorySidebarProps> = ({
       )}
 
       {/* Bulk Operations Panel Modal */}
-      {showBulkOperations && layout.selected_repositories.length > 1 && (
+      {showBulkOperations && (layout.selected_repositories || []).length > 1 && (
         <div className="bulk-operations-modal">
           <div className="bulk-operations-backdrop" onClick={() => setShowBulkOperations(false)} />
           <div className="bulk-operations-container">
             <BulkOperationsPanel
               repositories={Object.values(workspace?.repositories || {})}
-              selectedRepositories={new Set(layout.selected_repositories)}
+              selectedRepositories={new Set(layout.selected_repositories || [])}
               onClose={() => setShowBulkOperations(false)}
             />
           </div>

@@ -307,6 +307,19 @@ export interface AppState {
   
   // Performance monitoring
   performance: PerformanceMetrics;
+  
+  // Onboarding state
+  is_first_time: boolean;
+  
+  // User information
+  user?: UserInfo;
+}
+
+export interface UserInfo {
+  name: string;
+  email: string;
+  workspace_name?: string;
+  created_at: number;
 }
 
 export interface BackgroundTask {

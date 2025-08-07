@@ -125,7 +125,8 @@
 .controls-section {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  flex-wrap: nowrap;
 }
 
 .sort-select {
@@ -139,7 +140,9 @@
   font-size: 11px;
 }
 
-.filter-button {
+.filter-button,
+.organization-button,
+.discovery-button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -152,7 +155,9 @@
   transition: all 0.2s ease;
 }
 
-.filter-button:hover {
+.filter-button:hover,
+.organization-button:hover,
+.discovery-button:hover {
   background: var(--bg-hover);
   color: var(--text-primary);
 }
@@ -168,6 +173,54 @@
 /* Organization sections */
 .organization-section {
   margin-bottom: 8px;
+}
+
+/* Empty organizations state */
+.organizations-empty {
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.empty-organizations-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.empty-organizations-header > span {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.create-org-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.create-org-button:hover {
+  background: var(--accent-primary, #3b82f6);
+  border-color: var(--accent-primary, #3b82f6);
+  color: white;
+}
+
+.empty-organizations-hint {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin: 0;
+  font-style: italic;
 }
 
 .organization-header {

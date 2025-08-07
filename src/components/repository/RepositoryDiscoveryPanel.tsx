@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useRepositoryDiscovery } from '../../hooks/useRepositoryDiscovery';
 import { RepositoryInfo, Organization } from '../../types/state';
+import { open } from '@tauri-apps/api/dialog';
 import './RepositoryDiscoveryPanel.css';
 
 interface RepositoryDiscoveryPanelProps {
@@ -43,14 +44,43 @@ const RepositoryDiscoveryPanel: React.FC<RepositoryDiscoveryPanelProps> = ({
   };
 
   const handleScanCommonPaths = async () => {
-    const commonPaths = [
+    // Check if user confirms automatic scan
+    const confirmed = window.confirm(
+      'This will scan common directories for Git repositories in your system. ' +
+      'This may take a few minutes depending on your system. Continue?'
+    );
+    
+    if (!confirmed) return;
+    
+    // Cross-platform common paths
+    const commonPaths = process.platform === 'darwin' ? [
+      // macOS paths
+      `${process.env.HOME}/Documents/GitHub`,
+      `${process.env.HOME}/Documents/Projects`,
+      `${process.env.HOME}/Projects`,
+      `${process.env.HOME}/Code`,
+      `${process.env.HOME}/Developer`,
+      `${process.env.HOME}/dev`,
+      `${process.env.HOME}/workspace`,
+      '/Users/Shared/Projects'
+    ] : process.platform === 'win32' ? [
+      // Windows paths
       'C:\\Users\\%USERNAME%\\Documents\\GitHub',
       'C:\\Users\\%USERNAME%\\Documents\\Projects',
       'C:\\Projects',
       'C:\\Code',
       'D:\\Projects',
       'D:\\Code'
-    ].map(path => path.replace('%USERNAME%', process.env.USERNAME || ''));
+    ].map(path => path.replace('%USERNAME%', process.env.USERNAME || '')) : [
+      // Linux paths
+      `${process.env.HOME}/Documents/GitHub`,
+      `${process.env.HOME}/Documents/Projects`,
+      `${process.env.HOME}/Projects`,
+      `${process.env.HOME}/Code`,
+      `${process.env.HOME}/dev`,
+      `${process.env.HOME}/workspace`,
+      '/home/shared/projects'
+    ];
     
     await scanMultiplePaths(commonPaths);
   };
@@ -63,6 +93,38 @@ const RepositoryDiscoveryPanel: React.FC<RepositoryDiscoveryPanelProps> = ({
     // This removes from the found list, not from the actual state
     // We would need to implement this in the hook
     console.log('Remove from found:', repoId);
+  };
+
+  const handleSelectFolder = async () => {
+    try {
+      const selected = await open({
+        directory: true,
+        multiple: false,
+        title: 'Select folder to scan for repositories'
+      });
+      
+      if (selected && typeof selected === 'string') {
+        setScanPath(selected);
+      }
+    } catch (error) {
+      console.error('Failed to open folder dialog:', error);
+    }
+  };
+
+  const handleSelectMultipleFolders = async () => {
+    try {
+      const selected = await open({
+        directory: true,
+        multiple: true,
+        title: 'Select folders to scan for repositories'
+      });
+      
+      if (selected && Array.isArray(selected)) {
+        await scanMultiplePaths(selected);
+      }
+    } catch (error) {
+      console.error('Failed to open folder dialog:', error);
+    }
   };
 
   return (
@@ -98,6 +160,14 @@ const RepositoryDiscoveryPanel: React.FC<RepositoryDiscoveryPanelProps> = ({
             onKeyDown={(e) => e.key === 'Enter' && handleScanDirectory()}
           />
           <button 
+            className="browse-button"
+            onClick={handleSelectFolder}
+            disabled={isScanning}
+            title="Browse for folder"
+          >
+            📁
+          </button>
+          <button 
             className="scan-button"
             onClick={handleScanDirectory}
             disabled={isScanning || !scanPath.trim()}
@@ -109,17 +179,24 @@ const RepositoryDiscoveryPanel: React.FC<RepositoryDiscoveryPanelProps> = ({
         <div className="quick-scan-buttons">
           <button 
             className="quick-scan-button"
+            onClick={handleSelectMultipleFolders}
+            disabled={isScanning}
+          >
+            📂 Select Multiple Folders
+          </button>
+          <button 
+            className="quick-scan-button"
             onClick={handleScanCommonPaths}
             disabled={isScanning}
           >
-            Scan Common Locations
+            🔍 Scan Common Locations
           </button>
           <button 
             className="quick-scan-button"
             onClick={() => scanDirectory(process.env.HOME || 'C:\\')}
             disabled={isScanning}
           >
-            Scan Home Directory
+            🏠 Scan Home Directory
           </button>
         </div>
       </div>

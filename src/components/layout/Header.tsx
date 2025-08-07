@@ -68,6 +68,10 @@ const Header: React.FC<HeaderProps> = ({
   const currentWorkspace = appState.workspaces[appState.active_workspace];
   const notificationStats = getNotificationStats();
 
+  // Debug: log user data
+  console.log('🐛 Header - User data:', appState.user);
+  console.log('🐛 Header - Full appState:', appState);
+
   return (
     <header className="app-header">
       <div className="header-left">
@@ -85,11 +89,6 @@ const Header: React.FC<HeaderProps> = ({
 
         {/* App logo and title */}
         <div className="app-brand">
-          <div className="app-logo">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-            </svg>
-          </div>
           <h1 className="app-title">CodeGit</h1>
         </div>
 
@@ -145,12 +144,6 @@ const Header: React.FC<HeaderProps> = ({
       </div>
 
       <div className="header-right">
-        {/* Sync status indicator */}
-        <div className="sync-status" title="Last sync: 2 minutes ago">
-          <svg className="sync-icon rotating" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M8 3a5 5 0 104.546 2.914.5.5 0 00-.908-.417A4 4 0 118 4v1l1.5-1.5L8 2v1z"/>
-          </svg>
-        </div>
 
         {/* Notifications */}
         <div className="notifications-wrapper" ref={notificationsRef}>
@@ -261,8 +254,8 @@ const Header: React.FC<HeaderProps> = ({
                   </svg>
                 </div>
                 <div className="user-details">
-                  <div className="user-name">John Doe</div>
-                  <div className="user-email">john@example.com</div>
+                  <div className="user-name">{appState.user?.name || 'User'}</div>
+                  <div className="user-email">{appState.user?.email || 'user@example.com'}</div>
                 </div>
               </div>
               <div className="user-menu-divider"></div>
@@ -287,7 +280,25 @@ const Header: React.FC<HeaderProps> = ({
                 </button>
                 <button className="user-menu-item">About</button>
                 <div className="user-menu-divider"></div>
-                <button className="user-menu-item">Sign Out</button>
+                <button 
+                  className="user-menu-item"
+                  onClick={async () => {
+                    // Reset app state and force onboarding
+                    try {
+                      // Clear localStorage
+                      localStorage.clear();
+                      
+                      // Reset database to first time state (optional - could also clear all data)
+                      // For now, just restart the app which will trigger onboarding
+                      window.location.reload();
+                    } catch (error) {
+                      console.error('Error during sign out:', error);
+                      window.location.reload(); // Force reload as fallback
+                    }
+                  }}
+                >
+                  Sign Out
+                </button>
               </div>
             </div>
           )}

@@ -7,6 +7,11 @@ use std::path::{Path, PathBuf};
 use std::env;
 use std::fs;
 
+mod database;
+mod commands;
+
+use commands::database::*;
+
 #[derive(Debug, Serialize, Deserialize)]
 struct GitCommit {
     id: String,
@@ -1413,7 +1418,19 @@ fn sync_submodule(_repo_path: String, _submodule_name: String) -> Result<String,
 
 fn main() {
     tauri::Builder::default()
+        .setup(|app| {
+            // Initialize database on app startup
+            let app_handle = app.handle();
+            tauri::async_runtime::spawn(async move {
+                match init_database(app_handle).await {
+                    Ok(_) => println!("✅ Database initialized successfully"),
+                    Err(e) => println!("❌ Failed to initialize database: {}", e),
+                }
+            });
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
+            // Git commands
             greet,
             open_repository,
             get_commits,
@@ -1453,7 +1470,23 @@ fn main() {
             sync_submodule,
             discover_repositories,
             get_file_content,
-            get_detailed_branches
+            get_detailed_branches,
+            // Database commands
+            init_database,
+            save_user_info,
+            get_user_info,
+            save_organization,
+            get_organizations,
+            delete_organization,
+            save_repository,
+            get_repositories,
+            delete_repository,
+            get_app_settings,
+            update_app_settings,
+            complete_onboarding_db,
+            migrate_from_localstorage,
+            get_database_info,
+            verify_data_migration
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

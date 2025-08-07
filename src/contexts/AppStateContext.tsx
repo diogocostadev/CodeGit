@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useReducer, useCallback, useEffect } from 'react';
-import { AppState, LayoutState, MainViewMode, RepositoryInfo, Organization, Workspace } from '../types/state';
+import { AppState, LayoutState, MainViewMode, RepositoryInfo, Organization, Workspace, UserInfo } from '../types/state';
+import databaseService from '../services/database';
 
 // Default state
 const createDefaultLayoutState = (): LayoutState => ({
@@ -11,11 +12,27 @@ const createDefaultLayoutState = (): LayoutState => ({
     search_query: '',
     expanded_organizations: [],
     sort_by: 'last_accessed',
-    filter: {}
+    filter: {
+      status: undefined,
+      sync_status: undefined,
+      organization: undefined,
+      has_conflicts: undefined,
+      is_favorite: undefined,
+      is_dirty: undefined
+    }
   },
   main_view: {
     mode: 'history',
-    filter: {}
+    filter: {
+      author: undefined,
+      date_range: undefined,
+      branch: undefined,
+      file_pattern: undefined,
+      message_pattern: undefined,
+      commit_type: undefined,
+      organization: undefined,
+      tags: undefined
+    }
   },
   details_panel: {
     type: 'repository_overview',
@@ -41,106 +58,12 @@ const createDefaultLayoutState = (): LayoutState => ({
 });
 
 const createDefaultWorkspace = (): Workspace => {
-  const now = Date.now();
-  
-  // Create sample organizations
-  const sampleOrganizations: Organization[] = [
-    {
-      id: 'personal',
-      name: 'Personal',
-      description: 'Personal projects',
-      color: '#3b82f6',
-      repositories: ['repo-1', 'repo-2'],
-      created_at: now,
-      updated_at: now
-    },
-    {
-      id: 'work',
-      name: 'Work Projects',
-      description: 'Company projects',
-      color: '#10b981',
-      repositories: ['repo-3'],
-      created_at: now,
-      updated_at: now
-    }
-  ];
-
-  // Create sample repositories
-  const sampleRepositories: Record<string, RepositoryInfo> = {
-    'repo-1': {
-      id: 'repo-1',
-      name: 'awesome-app',
-      path: '/Users/demo/projects/awesome-app',
-      organization_id: 'personal',
-      current_branch: 'main',
-      is_dirty: true,
-      modified_files: 3,
-      ahead_count: 2,
-      behind_count: 0,
-      has_conflicts: false,
-      last_commit: {
-        hash: 'abc123',
-        message: 'feat: add new authentication system',
-        author: 'John Doe',
-        timestamp: now - 3600000
-      },
-      remote_url: 'https://github.com/user/awesome-app.git',
-      last_accessed: now - 1800000,
-      created_at: now - 86400000,
-      updated_at: now - 1800000
-    },
-    'repo-2': {
-      id: 'repo-2',
-      name: 'mobile-client',
-      path: '/Users/demo/projects/mobile-client',
-      organization_id: 'personal',
-      current_branch: 'develop',
-      is_dirty: false,
-      modified_files: 0,
-      ahead_count: 0,
-      behind_count: 1,
-      has_conflicts: false,
-      last_commit: {
-        hash: 'def456',
-        message: 'fix: resolve memory leak in user service',
-        author: 'Jane Smith',
-        timestamp: now - 7200000
-      },
-      remote_url: 'https://github.com/user/mobile-client.git',
-      last_accessed: now - 3600000,
-      created_at: now - 172800000,
-      updated_at: now - 3600000
-    },
-    'repo-3': {
-      id: 'repo-3',
-      name: 'corporate-website',
-      path: '/Users/demo/work/corporate-website',
-      organization_id: 'work',
-      current_branch: 'feature/redesign',
-      is_dirty: true,
-      modified_files: 8,
-      ahead_count: 5,
-      behind_count: 2,
-      has_conflicts: true,
-      last_commit: {
-        hash: 'ghi789',
-        message: 'style: update homepage layout',
-        author: 'Bob Johnson',
-        timestamp: now - 1800000
-      },
-      remote_url: 'https://github.com/company/corporate-website.git',
-      last_accessed: now - 900000,
-      created_at: now - 259200000,
-      updated_at: now - 900000
-    }
-  };
-
   return {
     id: 'default',
-    name: 'Default Workspace',
-    description: 'Default workspace for CodeGit',
-    organizations: sampleOrganizations,
-    repositories: sampleRepositories,
+    name: 'My Workspace',
+    description: 'Your main workspace for Git repositories',
+    organizations: [],
+    repositories: {},
     last_accessed: Date.now(),
     created_at: Date.now()
   };
@@ -152,8 +75,8 @@ const createDefaultAppState = (): AppState => ({
   },
   active_workspace: 'default',
   layout: createDefaultLayoutState(),
-  current_repository: 'repo-1', // Set first repository as default
-  current_organization: 'personal', // Set first organization as default
+  current_repository: undefined,
+  current_organization: undefined,
   bulk_operations: {},
   background_tasks: [],
   is_loading: false,
@@ -184,7 +107,8 @@ const createDefaultAppState = (): AppState => ({
     ui_render_times: [],
     cache_hit_rate: 0,
     last_measured: Date.now()
-  }
+  },
+  is_first_time: true
 });
 
 // Action types
@@ -206,7 +130,9 @@ type AppAction =
   | { type: 'ADD_ERROR'; payload: any }
   | { type: 'CLEAR_ERRORS' }
   | { type: 'RESET_STATE' }
-  | { type: 'LOAD_PERSISTED_STATE'; payload: Partial<AppState> };
+  | { type: 'LOAD_PERSISTED_STATE'; payload: Partial<AppState> }
+  | { type: 'COMPLETE_ONBOARDING' }
+  | { type: 'SET_USER_INFO'; payload: UserInfo };
 
 // Reducer
 const appStateReducer = (state: AppState, action: AppAction): AppState => {
@@ -400,6 +326,18 @@ const appStateReducer = (state: AppState, action: AppAction): AppState => {
         errors: []
       };
 
+    case 'COMPLETE_ONBOARDING':
+      return {
+        ...state,
+        is_first_time: false
+      };
+
+    case 'SET_USER_INFO':
+      return {
+        ...state,
+        user: action.payload
+      };
+
     default:
       return state;
   }
@@ -417,7 +355,7 @@ interface AppStateContextValue {
   addRepository: (repo: RepositoryInfo) => void;
   removeRepository: (repoId: string) => void;
   updateRepository: (repo: RepositoryInfo) => void;
-  addOrganization: (org: Organization) => void;
+  addOrganization: (org: Organization) => Promise<void>;
   updateOrganization: (org: Organization) => void;
   removeOrganization: (orgId: string) => void;
   setWorkspace: (workspaceId: string) => void;
@@ -427,6 +365,8 @@ interface AppStateContextValue {
   addError: (error: any) => void;
   clearErrors: () => void;
   resetState: () => void;
+  completeOnboarding: () => Promise<void>;
+  setUserInfo: (user: UserInfo) => Promise<void>;
 }
 
 const AppStateContext = createContext<AppStateContextValue | undefined>(undefined);
@@ -440,45 +380,82 @@ export const useAppState = () => {
   return context;
 };
 
-// Storage keys
-const STORAGE_KEY = 'codegit_app_state';
-const STORAGE_VERSION = '1.0.0';
-
-// Persistence helpers
-const saveStateToStorage = (state: AppState) => {
+// SQLite persistence helpers
+const loadStateFromDatabase = async (): Promise<Partial<AppState> | null> => {
   try {
-    const stateToSave = {
-      version: STORAGE_VERSION,
-      timestamp: Date.now(),
-      state: {
-        workspaces: state.workspaces,
-        active_workspace: state.active_workspace,
-        layout: state.layout,
-        current_repository: state.current_repository,
-        current_organization: state.current_organization,
-        settings: state.settings
+    // Initialize database first
+    await databaseService.init();
+    
+    // Load user
+    const user = await databaseService.getUser();
+    
+    // Load organizations and build workspace
+    const organizations = await databaseService.getOrganizations();
+    
+    // Load repositories (for future use)
+    const repositories = await databaseService.getRepositories();
+    
+    // Load settings
+    const settings = await databaseService.getSettings();
+    
+    // Build workspace from database data
+    const workspace: Workspace = {
+      id: 'default',
+      name: user?.workspace_name || 'My Workspace',
+      description: user ? `${user.name}'s workspace` : 'Your main workspace',
+      organizations: organizations.map(org => ({
+        id: org.id,
+        name: org.name,
+        color: org.color,
+        description: org.description,
+        avatar: org.avatar,
+        repositories: [], // Will be populated from repositories table
+        settings: {
+          auto_fetch_interval: 5,
+          auto_group_by_domain: true,
+          default_branch_protection: false,
+          notification_preferences: {
+            pull_requests: true,
+            merge_conflicts: true,
+            sync_errors: true,
+            build_status: false,
+            mentions: true
+          }
+        },
+        created_at: Date.parse(org.created_at),
+        updated_at: Date.parse(org.updated_at)
+      })),
+      repositories: {},
+      last_accessed: Date.now(),
+      created_at: Date.now()
+    };
+    
+    console.log('📖 State loaded from SQLite database:', {
+      user: user?.name,
+      organizations: organizations.length,
+      repositories: repositories.length,
+      is_first_time: settings.is_first_time
+    });
+    
+    return {
+      workspaces: { 'default': workspace },
+      active_workspace: 'default',
+      user: user || undefined,
+      is_first_time: settings.is_first_time,
+      settings: {
+        auto_sync_interval: 5,
+        max_recent_repos: 10,
+        enable_notifications: true,
+        enable_background_sync: true,
+        theme_sync_with_system: true,
+        performance_monitoring: false,
+        telemetry_enabled: true,
+        language: settings.language,
+        startup_behavior: 'last_workspace' as const
       }
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
   } catch (error) {
-    console.warn('Failed to save state to localStorage:', error);
-  }
-};
-
-const loadStateFromStorage = (): Partial<AppState> | null => {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return null;
-
-    const parsed = JSON.parse(saved);
-    if (parsed.version !== STORAGE_VERSION) {
-      console.warn('State version mismatch, ignoring saved state');
-      return null;
-    }
-
-    return parsed.state;
-  } catch (error) {
-    console.warn('Failed to load state from localStorage:', error);
+    console.warn('Failed to load state from database:', error);
     return null;
   }
 };
@@ -490,25 +467,9 @@ interface AppStateProviderProps {
 
 export const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(appStateReducer, createDefaultAppState());
+  const [isLoading, setIsLoading] = React.useState(true);
 
-  // Load persisted state on mount
-  useEffect(() => {
-    const persistedState = loadStateFromStorage();
-    if (persistedState) {
-      dispatch({ type: 'LOAD_PERSISTED_STATE', payload: persistedState });
-    }
-  }, []);
-
-  // Save state to localStorage when it changes (debounced)
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      saveStateToStorage(state);
-    }, 1000); // Debounce for 1 second
-
-    return () => clearTimeout(timeoutId);
-  }, [state]);
-
-  // Convenience methods
+  // Convenience methods - Define all hooks before any conditional returns
   const setLayout = useCallback((layout: Partial<LayoutState>) => {
     dispatch({ type: 'SET_LAYOUT', payload: layout });
   }, []);
@@ -537,8 +498,21 @@ export const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) 
     dispatch({ type: 'UPDATE_REPOSITORY', payload: repo });
   }, []);
 
-  const addOrganization = useCallback((org: Organization) => {
-    dispatch({ type: 'ADD_ORGANIZATION', payload: org });
+  const addOrganization = useCallback(async (org: Organization) => {
+    try {
+      await databaseService.saveOrganization({
+        id: org.id,
+        name: org.name,
+        color: org.color,
+        description: org.description,
+        avatar: org.avatar,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      });
+      dispatch({ type: 'ADD_ORGANIZATION', payload: org });
+    } catch (error) {
+      console.error('Failed to save organization to database:', error);
+    }
   }, []);
 
   const updateOrganization = useCallback((org: Organization) => {
@@ -575,7 +549,62 @@ export const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) 
 
   const resetState = useCallback(() => {
     dispatch({ type: 'RESET_STATE' });
-    localStorage.removeItem(STORAGE_KEY);
+  }, []);
+
+  const completeOnboarding = useCallback(async () => {
+    try {
+      await databaseService.completeOnboarding();
+      dispatch({ type: 'COMPLETE_ONBOARDING' });
+    } catch (error) {
+      console.error('Failed to complete onboarding in database:', error);
+    }
+  }, []);
+
+  const setUserInfo = useCallback(async (user: UserInfo) => {
+    console.log('🔄 Atualizando dados do usuário no estado:', user);
+    try {
+      await databaseService.saveUser({
+        name: user.name,
+        email: user.email,
+        workspace_name: user.workspace_name
+      });
+      dispatch({ type: 'SET_USER_INFO', payload: user });
+    } catch (error) {
+      console.error('Failed to save user to database:', error);
+    }
+  }, []);
+
+  // Load state from SQLite on mount
+  useEffect(() => {
+    const loadInitialState = async () => {
+      try {
+        console.log('🚀 Starting app initialization...');
+        setIsLoading(true);
+        
+        // Try to migrate from localStorage first
+        console.log('🔄 Attempting localStorage migration...');
+        await databaseService.migrateFromLocalStorage();
+        
+        // Load state from database
+        console.log('📖 Loading state from database...');
+        const persistedState = await loadStateFromDatabase();
+        console.log('📊 Persisted state loaded:', persistedState);
+        
+        if (persistedState) {
+          dispatch({ type: 'LOAD_PERSISTED_STATE', payload: persistedState });
+          console.log('✅ State loaded successfully');
+        } else {
+          console.log('⚠️ No persisted state found - using default state');
+        }
+      } catch (error) {
+        console.error('❌ Failed to load initial state:', error);
+      } finally {
+        setIsLoading(false);
+        console.log('🏁 App initialization complete');
+      }
+    };
+    
+    loadInitialState();
   }, []);
 
   const value: AppStateContextValue = {
@@ -597,8 +626,33 @@ export const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) 
     setLoading,
     addError,
     clearErrors,
-    resetState
+    resetState,
+    completeOnboarding,
+    setUserInfo
   };
+
+  // Don't render children until state is loaded
+  if (isLoading) {
+    return (
+      <AppStateContext.Provider value={value}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          backgroundColor: '#0a0b0d',
+          color: 'white',
+          fontFamily: 'Inter',
+          fontSize: '14px'
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ marginBottom: '16px', fontSize: '24px' }}>🗄️</div>
+            <div>Initializing database...</div>
+          </div>
+        </div>
+      </AppStateContext.Provider>
+    );
+  }
 
   return (
     <AppStateContext.Provider value={value}>
