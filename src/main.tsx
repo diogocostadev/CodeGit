@@ -1,6 +1,8 @@
 // React is used by JSX, keep import even though it appears unused
 import ReactDOM from "react-dom/client";
 import App from "./App";
+import "./enhanced-design-system.css";
+import "./button-alignment-fixes.css";
 import "./styles.css";
 import "./design-system.css";
 import "./responsive.css";

@@ -135,19 +135,20 @@
   color: #ef4444;
 }
 
-/* ===== HEADER STYLES ===== */
+/* ===== HEADER STYLES APRIMORADO ===== */
 
 .app-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: var(--header-height, 48px);
-  padding: 0 16px;
-  background: var(--bg-elevated, #1f2937);
-  border-bottom: 1px solid var(--border-subtle, #374151);
-  color: var(--text-primary, #f9fafb);
+  height: 60px;
+  padding: 0 var(--space-4);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-primary);
+  color: var(--text-primary);
   user-select: none;
   z-index: 100;
+  font-family: var(--font-primary);
 }
 
 /* ===== LEFT SECTION ===== */
@@ -176,16 +177,17 @@
 }
 
 .app-logo {
-  color: var(--accent-primary, #3b82f6);
+  color: var(--primary-500);
   display: flex;
   align-items: center;
 }
 
 .app-title {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
   margin: 0;
   color: var(--text-primary);
+  font-family: var(--font-primary);
 }
 
 /* Breadcrumb navigation */
@@ -443,6 +445,7 @@
   margin-bottom: 4px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
