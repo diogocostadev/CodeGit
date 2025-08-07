@@ -135,7 +135,7 @@ export const useSmartNotifications = () => {
   }, []);
 
   const addNotification = useCallback((notification: Notification) => {
-    const currentNotifications = state.layout.header.notifications;
+    const currentNotifications = state.layout.header.notifications || [];
     const newNotifications = [notification, ...currentNotifications].slice(0, 50); // Keep max 50 notifications
     
     setLayout({
@@ -203,7 +203,7 @@ export const useSmartNotifications = () => {
       const now = Date.now();
       const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
       
-      const currentNotifications = state.layout.header.notifications;
+      const currentNotifications = state.layout.header.notifications || [];
       const filteredNotifications = currentNotifications.filter(
         notification => now - notification.timestamp < maxAge
       );
@@ -222,7 +222,7 @@ export const useSmartNotifications = () => {
   }, [state.layout.header, setLayout]);
 
   const markAllNotificationsRead = useCallback(() => {
-    const updatedNotifications = state.layout.header.notifications.map(n => ({
+    const updatedNotifications = (state.layout.header.notifications || []).map(n => ({
       ...n,
       is_read: true
     }));
@@ -236,7 +236,7 @@ export const useSmartNotifications = () => {
   }, [state.layout.header, setLayout]);
 
   const markNotificationRead = useCallback((notificationId: string) => {
-    const updatedNotifications = state.layout.header.notifications.map(n =>
+    const updatedNotifications = (state.layout.header.notifications || []).map(n =>
       n.id === notificationId ? { ...n, is_read: true } : n
     );
     
@@ -249,7 +249,7 @@ export const useSmartNotifications = () => {
   }, [state.layout.header, setLayout]);
 
   const removeNotification = useCallback((notificationId: string) => {
-    const filteredNotifications = state.layout.header.notifications.filter(
+    const filteredNotifications = (state.layout.header.notifications || []).filter(
       n => n.id !== notificationId
     );
     
@@ -284,7 +284,7 @@ export const useSmartNotifications = () => {
 
   // Get notification statistics
   const getNotificationStats = useCallback(() => {
-    const notifications = state.layout.header.notifications;
+    const notifications = state.layout.header.notifications || [];
     const stats = {
       total: notifications.length,
       unread: notifications.filter(n => !n.is_read).length,
@@ -301,8 +301,8 @@ export const useSmartNotifications = () => {
   }, [state.layout.header.notifications]);
 
   return {
-    notifications: state.layout.header.notifications,
-    unreadCount: state.layout.header.notifications.filter(n => !n.is_read).length,
+    notifications: state.layout.header.notifications || [],
+    unreadCount: (state.layout.header.notifications || []).filter(n => !n.is_read).length,
     markAllNotificationsRead,
     markNotificationRead,
     removeNotification,

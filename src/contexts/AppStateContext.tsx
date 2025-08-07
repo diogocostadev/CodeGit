@@ -40,15 +40,111 @@ const createDefaultLayoutState = (): LayoutState => ({
   shortcuts: {}
 });
 
-const createDefaultWorkspace = (): Workspace => ({
-  id: 'default',
-  name: 'Default Workspace',
-  description: 'Default workspace for CodeGit',
-  organizations: [],
-  repositories: {},
-  last_accessed: Date.now(),
-  created_at: Date.now()
-});
+const createDefaultWorkspace = (): Workspace => {
+  const now = Date.now();
+  
+  // Create sample organizations
+  const sampleOrganizations: Organization[] = [
+    {
+      id: 'personal',
+      name: 'Personal',
+      description: 'Personal projects',
+      color: '#3b82f6',
+      repositories: ['repo-1', 'repo-2'],
+      created_at: now,
+      updated_at: now
+    },
+    {
+      id: 'work',
+      name: 'Work Projects',
+      description: 'Company projects',
+      color: '#10b981',
+      repositories: ['repo-3'],
+      created_at: now,
+      updated_at: now
+    }
+  ];
+
+  // Create sample repositories
+  const sampleRepositories: Record<string, RepositoryInfo> = {
+    'repo-1': {
+      id: 'repo-1',
+      name: 'awesome-app',
+      path: '/Users/demo/projects/awesome-app',
+      organization_id: 'personal',
+      current_branch: 'main',
+      is_dirty: true,
+      modified_files: 3,
+      ahead_count: 2,
+      behind_count: 0,
+      has_conflicts: false,
+      last_commit: {
+        hash: 'abc123',
+        message: 'feat: add new authentication system',
+        author: 'John Doe',
+        timestamp: now - 3600000
+      },
+      remote_url: 'https://github.com/user/awesome-app.git',
+      last_accessed: now - 1800000,
+      created_at: now - 86400000,
+      updated_at: now - 1800000
+    },
+    'repo-2': {
+      id: 'repo-2',
+      name: 'mobile-client',
+      path: '/Users/demo/projects/mobile-client',
+      organization_id: 'personal',
+      current_branch: 'develop',
+      is_dirty: false,
+      modified_files: 0,
+      ahead_count: 0,
+      behind_count: 1,
+      has_conflicts: false,
+      last_commit: {
+        hash: 'def456',
+        message: 'fix: resolve memory leak in user service',
+        author: 'Jane Smith',
+        timestamp: now - 7200000
+      },
+      remote_url: 'https://github.com/user/mobile-client.git',
+      last_accessed: now - 3600000,
+      created_at: now - 172800000,
+      updated_at: now - 3600000
+    },
+    'repo-3': {
+      id: 'repo-3',
+      name: 'corporate-website',
+      path: '/Users/demo/work/corporate-website',
+      organization_id: 'work',
+      current_branch: 'feature/redesign',
+      is_dirty: true,
+      modified_files: 8,
+      ahead_count: 5,
+      behind_count: 2,
+      has_conflicts: true,
+      last_commit: {
+        hash: 'ghi789',
+        message: 'style: update homepage layout',
+        author: 'Bob Johnson',
+        timestamp: now - 1800000
+      },
+      remote_url: 'https://github.com/company/corporate-website.git',
+      last_accessed: now - 900000,
+      created_at: now - 259200000,
+      updated_at: now - 900000
+    }
+  };
+
+  return {
+    id: 'default',
+    name: 'Default Workspace',
+    description: 'Default workspace for CodeGit',
+    organizations: sampleOrganizations,
+    repositories: sampleRepositories,
+    last_accessed: Date.now(),
+    created_at: Date.now()
+  };
+};
 
 const createDefaultAppState = (): AppState => ({
   workspaces: {
@@ -56,8 +152,8 @@ const createDefaultAppState = (): AppState => ({
   },
   active_workspace: 'default',
   layout: createDefaultLayoutState(),
-  current_repository: undefined,
-  current_organization: undefined,
+  current_repository: 'repo-1', // Set first repository as default
+  current_organization: 'personal', // Set first organization as default
   bulk_operations: {},
   background_tasks: [],
   is_loading: false,
